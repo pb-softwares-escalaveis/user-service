@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: user-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/userservicedb
+    username: user
+    password: userpass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    default-schema: usuario
+    baseline-on-migrate: true
+    url: jdbc:postgresql://localhost:5432/userservicedb
+    user: user
+    password: userpass
