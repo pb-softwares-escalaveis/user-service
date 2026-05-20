@@ -1,6 +1,11 @@
+volumes:
+    postgres_data:
+      name: userservice-db-volume
 services:
   postgres:
     image: postgres:17-alpine3.23
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: userpass

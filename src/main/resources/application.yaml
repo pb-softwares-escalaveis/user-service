@@ -19,7 +19,7 @@ spring:
 
   flyway:
     enabled: true
-    default-schema: usuario
+    default-schema: usuarios
     baseline-on-migrate: true
     url: jdbc:postgresql://localhost:5432/userservicedb
     user: user
