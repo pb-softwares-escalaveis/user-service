@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuario_seq_gen")
@@ -33,7 +33,11 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
-    //TODO - perguntar sobre banco de armazenamento de senha
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Auth auth;
+
+    @Column
+    private String fotoPerfil;
 
     @Column(nullable = false, unique = true)
     private String email;

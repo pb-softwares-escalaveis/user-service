@@ -20,7 +20,7 @@ public class Endereco {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User usuario;
+    private Usuario usuario;
 
     @Column(nullable = false)
     private String pais;
