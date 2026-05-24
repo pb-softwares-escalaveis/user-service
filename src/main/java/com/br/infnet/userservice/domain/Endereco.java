@@ -22,27 +22,27 @@ public class Endereco {
     @JoinColumn(name = "user_id", nullable = false)
     private Usuario usuario;
 
-    @Column(nullable = false)
+    @Column(name = "pais", nullable = false)
     private String pais;
 
-    @Column(nullable = false)
+    @Column(name = "estado", nullable = false)
     private String estado;
 
-    @Column(nullable = false)
+    @Column(name = "cidade", nullable = false)
     private String cidade;
 
-    @Column(nullable = false)
+    @Column(name = "bairro", nullable = false)
     private String bairro;
 
-    @Column(nullable = false)
+    @Column(name = "rua", nullable = false)
     private String rua;
 
-    @Column
+    @Column(name = "numero")
     private String numero;
 
-    @Column
+    @Column (name = "complemento")
     private String complemento;
 
-    @Column(nullable = false)
+    @Column(name = "cep", nullable = false)
     private String cep;
 }

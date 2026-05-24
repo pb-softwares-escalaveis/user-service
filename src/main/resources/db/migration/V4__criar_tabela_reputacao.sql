@@ -1,0 +1,15 @@
+-- Criar a sequence que dita o id para a reputacao
+CREATE SEQUENCE IF NOT EXISTS usuarios.reputacao_seq START WITH 1 INCREMENT BY 1;
+
+-- Criar a tabela de reputacao no schema relacionando com tb_usuario
+CREATE TABLE IF NOT EXISTS usuarios.tb_reputacao
+(
+    id                  BIGINT PRIMARY KEY,
+    user_id             BIGINT UNIQUE NOT NULL,
+    marks               INT           NOT NULL DEFAULT 3,
+    reputacao           FLOAT         NOT NULL DEFAULT 5.0,
+    data_ultima_punicao TIMESTAMPTZ     NOT NULL,
+
+    CONSTRAINT fk_reputacao_usuario FOREIGN KEY (user_id)
+        REFERENCES usuarios.tb_usuario (id) ON DELETE CASCADE
+);

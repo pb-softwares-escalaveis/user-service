@@ -24,48 +24,45 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Endereco> enderecos;
 
-    @Column(nullable = false)
+    @Column(name = "nome", nullable = false)
     private String nome;
 
-    @Column(nullable = false)
+    @Column(name = "sobrenome", nullable = false)
     private String sobrenome;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private Auth auth;
 
-    @Column
+    @Column(name = "foto_perfil")
     private String fotoPerfil;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "cpf", nullable = false, unique = true)
     private String cpf;
 
-    @Column(nullable = false)
+    @Column(name = "data_nascimento", nullable = false)
     private LocalDate dataNascimento;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "telefone", nullable = false, unique = true)
     private String telefone;
 
     @Enumerated (EnumType.STRING)
     private Status status;
 
-    @Column(nullable = false)
-    private int marks;
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Reputacao reputacao;
 
-    @Column(nullable = false)
-    private float reputacao;
+    @Column(name = "data_criacao", updatable = false)
+    private OffsetDateTime dataCriacao;
 
-    @Column(name = "created_at", updatable = false)
-    private OffsetDateTime createdAt;
+    @Column(name = "data_ultimo_login")
+    private OffsetDateTime ultimoLogin;
 
-    @Column(name = "last_login")
-    private OffsetDateTime lastLogin;
-
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
+    @Column(name = "data_atualizacao")
+    private OffsetDateTime dataAtualizacao;
 }

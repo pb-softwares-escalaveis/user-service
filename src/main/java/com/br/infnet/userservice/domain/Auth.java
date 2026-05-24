@@ -1,6 +1,7 @@
 package com.br.infnet.userservice.domain;
 
 import com.br.infnet.userservice.enums.ModoVerificacao;
+import com.br.infnet.userservice.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,18 +24,21 @@ public class Auth {
     @JoinColumn(name = "user_id", nullable = false)
     private Usuario usuario;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "hash_senha", nullable = false, unique = true)
     private String hashSenha;
 
-    @Column
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Column(name = "token", unique = true)
     private String token;
 
-    @Column(nullable = false)
-    private boolean verificado;
+    @Column(name = "is_verificado", nullable = false)
+    private boolean isVerificado;
 
     @Enumerated(EnumType.STRING)
     private ModoVerificacao modoVerificacao;
 
-    @Column(nullable = false)
-    private boolean verificacao2etapas;
+    @Column(name="verificacao_duas_etapas", nullable = false)
+    private boolean verificacaoDuasEtapas;
 }

@@ -5,14 +5,14 @@ CREATE SEQUENCE IF NOT EXISTS usuarios.endereco_seq START WITH 1 INCREMENT BY 1;
 CREATE TABLE IF NOT EXISTS usuarios.tb_endereco
 (
     id          BIGINT PRIMARY KEY,
-    user_id     BIGINT       NOT NULL,
+    user_id     BIGINT UNIQUE NOT NULL,
     pais        VARCHAR(100) NOT NULL,
     estado      VARCHAR(100) NOT NULL,
     cidade      VARCHAR(150) NOT NULL,
     bairro      VARCHAR(150) NOT NULL,
     rua         VARCHAR(255) NOT NULL,
     numero      VARCHAR(50),
-    complemento VARCHAR(255),
+    complemento VARCHAR(100),
     cep         VARCHAR(20)  NOT NULL,
 
     CONSTRAINT fk_endereco_usuario FOREIGN KEY (user_id)
