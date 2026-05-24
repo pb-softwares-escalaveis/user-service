@@ -7,8 +7,9 @@ CREATE TABLE IF NOT EXISTS usuarios.tb_auth
     id                 BIGINT PRIMARY KEY,
     user_id            BIGINT UNIQUE       NOT NULL,
     hash_senha         VARCHAR(255) UNIQUE NOT NULL,
-    token              VARCHAR(255) UNIQUE NOT NULL,
+    token              VARCHAR(255) UNIQUE,
     verificado         BOOLEAN             NOT NULL DEFAULT FALSE,
+    modo_verificacao   VARCHAR(50) check (modo_verificacao in ('EMAIL','SMS', 'TELEGRAM')),
     verificacao2etapas BOOLEAN             NOT NULL DEFAULT FALSE,
 
     CONSTRAINT fk_auth_usuario FOREIGN KEY (user_id)

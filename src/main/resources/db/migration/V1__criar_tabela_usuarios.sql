@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS usuarios.tb_usuario
     cpf             VARCHAR(255) UNIQUE NOT NULL,
     data_nascimento DATE                NOT NULL,
     telefone        VARCHAR(20) UNIQUE  NOT NULL,
-    status          VARCHAR(50)         NOT NULL DEFAULT 'ACTIVE',
+    status          VARCHAR(50) check (status in ('ATIVO','SUSPENSO', 'BANIDO')) NOT NULL DEFAULT 'ATIVO',
     marks           INTEGER             NOT NULL DEFAULT 3,
     reputacao       FLOAT               NOT NULL DEFAULT 5.00,
     last_login      TIMESTAMPTZ,

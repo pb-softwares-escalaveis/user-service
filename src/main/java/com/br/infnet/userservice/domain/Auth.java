@@ -1,5 +1,6 @@
 package com.br.infnet.userservice.domain;
 
+import com.br.infnet.userservice.enums.ModoVerificacao;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,9 +26,15 @@ public class Auth {
     @Column(nullable = false, unique = true)
     private String hashSenha;
 
+    @Column
     private String token;
 
+    @Column(nullable = false)
     private boolean verificado;
 
+    @Enumerated(EnumType.STRING)
+    private ModoVerificacao modoVerificacao;
+
+    @Column(nullable = false)
     private boolean verificacao2etapas;
 }
