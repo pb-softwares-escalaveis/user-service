@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS usuarios.tb_auth
     role               VARCHAR(50) check (role in ('USER','ADMIN')) NOT NULL DEFAULT 'USER',
     token              VARCHAR(255) UNIQUE,
     is_verificado      BOOLEAN             NOT NULL DEFAULT FALSE,
-    modo_verificacao   VARCHAR(50) check (modo_verificacao in ('EMAIL','SMS', 'TELEGRAM')),
+    modo_verificacao   VARCHAR(50) check (modo_verificacao in ('PENDENTE','EMAIL','SMS','TELEGRAM')),
     verificacao_duas_etapas BOOLEAN             NOT NULL DEFAULT FALSE,
 
     CONSTRAINT fk_auth_usuario FOREIGN KEY (user_id)

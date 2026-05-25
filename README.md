@@ -15,12 +15,17 @@ A arquitetura do domínio gira em torno da entidade central `Usuario`, que possu
 
 Atualmente mapeados e disponibilizados (base path: `/usuarios`):
 
-* `GET /usuarios` 
-  * Retorna uma lista com os usuários do sistema.
-* `GET /usuarios/{id}` 
-  * Retorna o payload detalhado de um usuário específico, resgatando seus agregados configurados via DTO.
+* `GET /usuarios/{id}`
+  * Retorna o payload detalhado do perfil de um usuário específico validando seu status (`200 OK`). Retorna exceção caso não encontrado ou inativo.
 
-*(Endpoints de persistência e deleção como `POST /usuarios`, `PUT /usuarios/{id}` e `DELETE /usuarios/{id}` podem ser incluídos nesta mesma arquitetura seguindo os Controllers).*
+* `GET /usuarios/{id}/status`
+  * Retorna de maneira enxuta o status atual da conta do usuário.
+
+* `POST /usuarios/novo`
+  * Rota de criação de novos usuários e configuração do seu respectivo Endereço, Auth (senha com hash) e inicialização da engine de Reputação. Exige um JSON validado e retorna payload limpo (`201 Created`).
+
+* `DELETE /usuarios/{id}`
+  * Realiza a exclusão lógica (*soft delete*) da conta do usuário, trocando seu status para inativo mantendo a integridade no histórico e metadados. Sem retorno de corpo (`204 No Content`).
 
 ## 🗄️ Esquema do Banco de Dados
 

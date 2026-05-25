@@ -1,8 +1,9 @@
 volumes:
     postgres_data:
-      name: userservice-db-volume
+      name: user-service-db-volume
 services:
   postgres:
+    container_name: user-service-postgres
     image: postgres:17-alpine3.23
     volumes:
       - postgres_data:/var/lib/postgresql/data

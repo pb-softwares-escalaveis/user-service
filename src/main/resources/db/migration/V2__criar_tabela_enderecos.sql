@@ -11,9 +11,9 @@ CREATE TABLE IF NOT EXISTS usuarios.tb_endereco
     cidade      VARCHAR(150) NOT NULL,
     bairro      VARCHAR(150) NOT NULL,
     rua         VARCHAR(255) NOT NULL,
-    numero      VARCHAR(50),
-    complemento VARCHAR(100),
-    cep         VARCHAR(20)  NOT NULL,
+    numero      VARCHAR(10),
+    complemento VARCHAR(50),
+    cep         VARCHAR(9)  NOT NULL,
 
     CONSTRAINT fk_endereco_usuario FOREIGN KEY (user_id)
         REFERENCES usuarios.tb_usuario (id) ON DELETE CASCADE

@@ -9,11 +9,15 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "tb_reputacao", schema = "usuarios")
+@Table(name = "tb_reputacao", schema = "usuarios", check = {
+        @CheckConstraint(name = "chk_pontos_reputacao", constraint = "reputacao >= 0 AND reputacao <= 5.0"),
+        @CheckConstraint(name = "chk_marks_positivos", constraint = "marks >= 0 AND marks <= 3")
+})
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class Reputacao {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reputacao_seq_gen")
