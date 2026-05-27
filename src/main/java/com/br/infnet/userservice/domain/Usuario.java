@@ -41,8 +41,8 @@ public class Usuario {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Auth auth;
+    @Column(name = "keycloak_id", unique = true, length = 36)
+    private String keycloakId;
 
     @Column(name = "foto_perfil")
     private String fotoPerfil;

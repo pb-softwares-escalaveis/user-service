@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS usuarios.tb_usuario
     nome              VARCHAR(50)                                                              NOT NULL,
     sobrenome         VARCHAR(50)                                                              NOT NULL,
     username          VARCHAR(50) UNIQUE                                                       NOT NULL,
+    keycloak_id       VARCHAR(36) UNIQUE,
     foto_perfil       VARCHAR(200),
     email             VARCHAR(255) UNIQUE                                                      NOT NULL,
     cpf               VARCHAR(11) UNIQUE                                                       NOT NULL,

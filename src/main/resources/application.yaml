@@ -24,3 +24,15 @@ spring:
     url: jdbc:postgresql://localhost:5432/userservicedb
     user: user
     password: userpass
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/leilao-service
+
+keycloak:
+  server-url: http://localhost:8081
+  realm: leilao-service
+  client-id: user-service-client
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}

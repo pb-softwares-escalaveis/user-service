@@ -7,9 +7,26 @@ services:
     image: postgres:17-alpine3.23
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: userpass
       POSTGRES_DB: userservicedb
     ports:
       - "5432:5432"
+
+  keycloak:
+    container_name: user-service-keycloak
+    image: quay.io/keycloak/keycloak:26.6.2
+    environment:
+      KEYCLOAK_ADMIN: user
+      KEYCLOAK_ADMIN_PASSWORD: userpass
+      KC-DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloakdb
+      KC_DB_USERNAME: user
+      KC_DB_PASSWORD: userpass
+    ports:
+      - "8081:8080"
+    command: start-dev
+    depends_on:
+      - postgres
