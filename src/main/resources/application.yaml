@@ -3,9 +3,9 @@ spring:
     name: user-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/userservicedb
-    username: user
-    password: userpass
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/userservicedb}
+    username: ${SPRING_DATASOURCE_USERNAME:user}
+    password: ${SPRING_DATASOURCE_PASSWORD:userpass}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -21,18 +21,15 @@ spring:
     enabled: true
     default-schema: usuarios
     baseline-on-migrate: true
-    url: jdbc:postgresql://localhost:5432/userservicedb
-    user: user
-    password: userpass
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8081/realms/leilao-service
+          issuer-uri: ${KEYCLOAK_SERVER_URL:http://localhost:8081}/realms/leilao-service
 
 keycloak:
-  server-url: http://localhost:8081
+  server-url: ${KEYCLOAK_SERVER_URL:http://localhost:8081}
   realm: leilao-service
   client-id: user-service-client
   client-secret: ${KEYCLOAK_CLIENT_SECRET}

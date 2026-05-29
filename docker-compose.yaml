@@ -1,32 +1,80 @@
 volumes:
     postgres_data:
       name: user-service-db-volume
+
+networks:
+  leilao-network:
+    driver: bridge
+
 services:
   postgres:
     container_name: user-service-postgres
     image: postgres:17-alpine3.23
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh
+      - ./init-dbs.sql:/docker-entrypoint-initdb.d/init-dbs.sql
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: userpass
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: userservicedb
     ports:
       - "5432:5432"
+    networks:
+        - leilao-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d userservicedb -U ${DB_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   keycloak:
     container_name: user-service-keycloak
     image: quay.io/keycloak/keycloak:26.6.2
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
     environment:
-      KEYCLOAK_ADMIN: user
-      KEYCLOAK_ADMIN_PASSWORD: userpass
-      KC-DB: postgres
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_FROM: ${SMTP_FROM}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloakdb
-      KC_DB_USERNAME: user
-      KC_DB_PASSWORD: userpass
+      KC_DB_USERNAME: ${DB_USER}
+      KC_DB_PASSWORD: ${DB_PASSWORD}
+      KC_HEALTH_ENABLED: "true"
     ports:
       - "8081:8080"
-    command: start-dev
+    command: start-dev --import-realm
+    networks:
+        - leilao-network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "cat /dev/null > /dev/tcp/127.0.0.1/8080 || exit 1" ]
+      interval: 20s
+      timeout: 5s
+      retries: 15
+
+  user-service:
+    container_name: user-service
+    image: shyuu7/user-service:1.0.0
+    restart: always
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/userservicedb
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+    networks:
+      - leilao-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy

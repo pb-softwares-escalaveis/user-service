@@ -36,6 +36,24 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PostMapping("/esqueci-senha")
+    public ResponseEntity<Void> solicitarResetDeSenha(@RequestParam String email) {
+        usuarioService.solicitarResetDeSenha(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/senha")
+    public ResponseEntity<Void> alterarSenha(@RequestBody String novaSenha) {
+        usuarioService.alterarPropriaSenha(novaSenha);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/ativar-2fa")
+    public ResponseEntity<Void> pedirHabilitacao2FA() {
+        usuarioService.forcarConfiguracaoMFA();
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarUsuario(@PathVariable Long id) {
         usuarioService.deletarUsuario(id);

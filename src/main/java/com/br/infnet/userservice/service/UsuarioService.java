@@ -13,16 +13,20 @@ import com.br.infnet.userservice.repository.UsuarioRepository;
 import jakarta.ws.rs.core.Response;
 import org.jspecify.annotations.NonNull;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 public class UsuarioService {
@@ -93,6 +97,44 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
+    public void solicitarResetDeSenha(String email) {
+        List<UserRepresentation> usuariosIdp = keycloak.realm(realm).users().search(null, null, null, email, 0, 1);
+
+        if (usuariosIdp.isEmpty()) {
+            return;
+        }
+
+        String userIdIdp = usuariosIdp.getFirst().getId();
+        UserResource userResource = keycloak.realm(realm).users().get(userIdIdp);
+
+        userResource.executeActionsEmail(List.of("UPDATE_PASSWORD"));
+    }
+
+    public void alterarPropriaSenha(String senhaNova) {
+        JwtAuthenticationToken auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        assert auth != null;
+        String userIdIdp = auth.getToken().getClaimAsString("sub");
+
+        UserResource userResource = keycloak.realm(realm).users().get(userIdIdp);
+
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(senhaNova);
+        credential.setTemporary(false);
+
+        userResource.resetPassword(credential);
+    }
+
+
+    public void forcarConfiguracaoMFA() {
+        JwtAuthenticationToken auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        assert auth != null;
+        String userIdIdp = auth.getToken().getClaimAsString("sub");
+
+        UserResource userResource = keycloak.realm(realm).users().get(userIdIdp);
+        userResource.executeActionsEmail(List.of("CONFIGURE_TOTP"));
+    }
+
     private String criarUsuarioViaKeycloakAPI(UsuarioCreationRequest request) {
         UserRepresentation userKc = getUserRepresentation(request);
 
@@ -127,6 +169,7 @@ public class UsuarioService {
         userKc.setLastName(request.sobrenome());
         userKc.setEnabled(true);
         userKc.setCredentials(Collections.singletonList(credential));
+        userKc.setRequiredActions(List.of("VERIFY_EMAIL"));
         return userKc;
     }
 }
