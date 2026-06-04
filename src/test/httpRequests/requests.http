@@ -1,0 +1,56 @@
+### Sugerir Usernames baseado no nome do usuário
+GET http://localhost:8080/usuarios/listar-usernames?nome=Larissa
+Accept: application/json
+
+### Listar Avatares Disponíveis no S3/MinIO
+GET http://localhost:8080/usuarios/listar-pfps
+Accept: application/json
+
+### Criar Novo Usuário (Gera registro no Keycloak e no Postgres)
+POST http://localhost:8080/usuarios/novo
+Content-Type: application/json
+
+{
+  "nome": "Ricardo",
+  "sobrenome": "Oliveira",
+  "email": "ricardo.teste@email.com",
+  "cpf": "12345678909",
+  "dataNascimento": "1990-05-20",
+  "telefone": "11988887777",
+  "username": "ricardo_martelo99",
+  "senha": "SenhaForte@123",
+  "enderecos": [
+    {
+      "pais": "Brasil",
+      "estado": "SP",
+      "cidade": "São Paulo",
+      "bairro": "Pinheiros",
+      "rua": "Rua das Flores",
+      "numero": "100",
+      "cep": "05422-000"
+    }
+  ]
+}
+
+### ENDPOINTS PROTEGIDOS - REQUEREM TOKEN DE AUTENTICAÇÃO
+
+### Obter Perfil do Usuário por ID (UUID)
+GET http://localhost:8080/usuarios/{{ID_DO_USUARIO}}/perfil
+Authorization: Bearer {{TOKEN}}
+Accept: application/json
+
+### Alterar Foto de Perfil (O sub do Token identifica o dono)
+PUT http://localhost:8080/usuarios/trocar-pfp
+Authorization: Bearer {{TOKEN}}
+Content-Type: text/plain
+
+"http://localhost:9000/usuarios/novo-avatar.jpg"
+
+### Consultar Informações do Vendedor
+GET http://localhost:8080/usuarios/{{ID_DO_USUARIO}}/seller-info
+Authorization: Bearer {{TOKEN}}
+Accept: application/json
+
+### Deletar (Inativar) Usuário
+DELETE http://localhost:8080/usuarios/{{ID_DO_USUARIO}}
+Authorization: Bearer {{TOKEN}}

@@ -4,6 +4,8 @@ import com.br.infnet.userservice.domain.Endereco;
 import com.br.infnet.userservice.domain.Usuario;
 import com.br.infnet.userservice.dto.UsuarioCreationRequest;
 import com.br.infnet.userservice.dto.UsuarioProfileResponse;
+import com.br.infnet.userservice.dto.UsuarioResponse;
+import com.br.infnet.userservice.dto.VendedorResponseInfo;
 import com.br.infnet.userservice.enums.Status;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +16,7 @@ import java.util.List;
 public class UsuarioMapper {
 
     // ==========================================
-    // 1. Converter: Entidade -> ProfileResponse
+    // 1. Converter: Entidade Usuario -> UsuarioProfileResponse
     // ==========================================
     public UsuarioProfileResponse toProfileResponse(Usuario usuario) {
         if (usuario == null) return null;
@@ -45,6 +47,7 @@ public class UsuarioMapper {
         novoUsuario.setDataNascimento(request.dataNascimento());
         novoUsuario.setTelefone(request.telefone());
         novoUsuario.setUsername(request.username());
+        novoUsuario.setFotoPerfil("https://bucket.oleiloeiroonline.top/profile-images/default-pfp.jpg");
         novoUsuario.setStatus(Status.ATIVO);
         novoUsuario.setDataCriacao(OffsetDateTime.now());
 
@@ -67,5 +70,48 @@ public class UsuarioMapper {
             novoUsuario.setEnderecos(listaEnderecos);
         }
         return novoUsuario;
+    }
+
+    // ==========================================
+    // 3. Converter: Entidade -> VendedorResponseInfo
+    // ==========================================
+    public VendedorResponseInfo toVendedorResponseInfo(Usuario usuario) {
+        if (usuario == null) return null;
+
+        Float valorReputacao = null;
+        if (usuario.getReputacao() != null) {
+            valorReputacao = usuario.getReputacao().getReputacao();
+        }
+
+        String cidade = null;
+        String pais = null;
+        if (usuario.getEnderecos() != null && !usuario.getEnderecos().isEmpty()) {
+            Endereco enderecoPrincipal = usuario.getEnderecos().getFirst();
+            cidade = enderecoPrincipal.getCidade();
+            pais = enderecoPrincipal.getPais();
+        }
+
+        return new VendedorResponseInfo(
+                usuario.getNome(),
+                usuario.getSobrenome(),
+                usuario.getUsername(),
+                valorReputacao,
+                cidade,
+                pais
+        );
+    }
+    // ==========================================
+    // 4. Converter: Entidade Usuario -> UsuarioResponse
+    // ==========================================
+    public UsuarioResponse toResponse(Usuario usuario) {
+        if (usuario == null) return null;
+
+        return new UsuarioResponse(
+                usuario.getNome(),
+                usuario.getSobrenome(),
+                usuario.getCpf(),
+                usuario.getEmail(),
+                usuario.getTelefone()
+        );
     }
 }

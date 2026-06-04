@@ -8,6 +8,7 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tb_usuario", schema = "usuarios", check = {
@@ -25,9 +26,8 @@ import java.util.List;
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuario_seq_gen")
-    @SequenceGenerator(schema = "usuarios", name = "usuario_seq_gen", sequenceName = "usuario_seq", allocationSize = 1)
-    private Long id;
+    @Column(name = "id", unique = true, length = 36)
+    private UUID keycloakId;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Endereco> enderecos;
@@ -40,9 +40,6 @@ public class Usuario {
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
-
-    @Column(name = "keycloak_id", unique = true, length = 36)
-    private String keycloakId;
 
     @Column(name = "foto_perfil")
     private String fotoPerfil;

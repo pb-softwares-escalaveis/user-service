@@ -1,18 +1,14 @@
 -- Criando o schema
 CREATE SCHEMA IF NOT EXISTS usuarios;
 
--- Criar a sequence que dita o id para o usuario
-CREATE SEQUENCE IF NOT EXISTS usuarios.usuario_seq START WITH 1 INCREMENT BY 1;
-
 -- Criar a tabela de usuarios no schema
 CREATE TABLE IF NOT EXISTS usuarios.tb_usuario
 (
-    id                BIGINT PRIMARY KEY,
+    id                uuid PRIMARY KEY,
     nome              VARCHAR(50)                                                              NOT NULL,
     sobrenome         VARCHAR(50)                                                              NOT NULL,
     username          VARCHAR(50) UNIQUE                                                       NOT NULL,
-    keycloak_id       VARCHAR(36) UNIQUE,
-    foto_perfil       VARCHAR(200),
+    foto_perfil       VARCHAR(200)                                                                      DEFAULT 'https://bucket.oleiloeiroonline.top/profile-images/default-pfp.jpg',
     email             VARCHAR(255) UNIQUE                                                      NOT NULL,
     cpf               VARCHAR(11) UNIQUE                                                       NOT NULL,
     data_nascimento   DATE                                                                     NOT NULL,

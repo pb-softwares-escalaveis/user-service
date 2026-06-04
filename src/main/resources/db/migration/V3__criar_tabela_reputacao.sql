@@ -5,7 +5,7 @@ CREATE SEQUENCE IF NOT EXISTS usuarios.reputacao_seq START WITH 1 INCREMENT BY 1
 CREATE TABLE IF NOT EXISTS usuarios.tb_reputacao
 (
     id                  BIGINT PRIMARY KEY,
-    user_id             BIGINT UNIQUE NOT NULL,
+    user_id             uuid UNIQUE NOT NULL,
     marks               INT           NOT NULL DEFAULT 3,
     reputacao           FLOAT         NOT NULL DEFAULT 5.0,
     data_ultima_punicao TIMESTAMPTZ,
