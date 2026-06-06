@@ -9,7 +9,7 @@ import com.br.infnet.userservice.dto.VendedorResponseInfo;
 import com.br.infnet.userservice.enums.Status;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Component
@@ -49,7 +49,7 @@ public class UsuarioMapper {
         novoUsuario.setUsername(request.username());
         novoUsuario.setFotoPerfil("https://bucket.oleiloeiroonline.top/profile-images/default-pfp.jpg");
         novoUsuario.setStatus(Status.ATIVO);
-        novoUsuario.setDataCriacao(OffsetDateTime.now());
+        novoUsuario.setDataCriacao(Instant.now());
 
         if (request.enderecos() != null && !request.enderecos().isEmpty()) {
             List<Endereco> listaEnderecos = request.enderecos().stream()

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "tb_reputacao", schema = "usuarios", check = {
@@ -35,5 +35,5 @@ public class Reputacao {
     private float reputacao;
 
     @Column(name= "data_ultima_punicao")
-    private OffsetDateTime dataUltimaPunicao;
+    private Instant dataUltimaPunicao;
 }

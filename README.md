@@ -91,7 +91,16 @@ erDiagram
 
 O microsserviço requer o banco de dados rodando em background. A estrutura está contida no arquivo `docker-compose.yaml`.
 
-Para iniciar o banco isolado de forma limpa (destruindo volumes antigos):
+**IMPORTANTE**
+
+Para ser compatível com o broker do Kafka presente neste projeto, é necessária a criação manual da rede.
+Use o comando abaixo para criar a rede Docker necessária:
+```bash
+docker network create leilao-network
+```
+Depois, inicie o conteiner do Kafka na mesma rede, usando o docker-compose daquele projeto.
+
+Para iniciar o este microsserviço de forma limpa (destruindo volumes antigos):
 ```bash
 docker-compose down -v
 docker-compose up -d

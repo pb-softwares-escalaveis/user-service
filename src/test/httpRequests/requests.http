@@ -13,11 +13,11 @@ Content-Type: application/json
 {
   "nome": "Ricardo",
   "sobrenome": "Oliveira",
-  "email": "ricardo.teste@email.com",
+  "email": "ricardo_oliveira@email.com",
   "cpf": "12345678909",
   "dataNascimento": "1990-05-20",
   "telefone": "11988887777",
-  "username": "ricardo_martelo99",
+  "username": "ricardoOuro37",
   "senha": "SenhaForte@123",
   "enderecos": [
     {
@@ -32,25 +32,19 @@ Content-Type: application/json
   ]
 }
 
-### ENDPOINTS PROTEGIDOS - REQUEREM TOKEN DE AUTENTICAÇÃO
-
 ### Obter Perfil do Usuário por ID (UUID)
 GET http://localhost:8080/usuarios/{{ID_DO_USUARIO}}/perfil
-Authorization: Bearer {{TOKEN}}
 Accept: application/json
 
-### Alterar Foto de Perfil (O sub do Token identifica o dono)
+### Alterar Foto de Perfil
 PUT http://localhost:8080/usuarios/trocar-pfp
-Authorization: Bearer {{TOKEN}}
 Content-Type: text/plain
 
 "http://localhost:9000/usuarios/novo-avatar.jpg"
 
 ### Consultar Informações do Vendedor
 GET http://localhost:8080/usuarios/{{ID_DO_USUARIO}}/seller-info
-Authorization: Bearer {{TOKEN}}
 Accept: application/json
 
 ### Deletar (Inativar) Usuário
 DELETE http://localhost:8080/usuarios/{{ID_DO_USUARIO}}
-Authorization: Bearer {{TOKEN}}

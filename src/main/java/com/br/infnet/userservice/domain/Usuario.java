@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +27,7 @@ public class Usuario {
 
     @Id
     @Column(name = "id", unique = true, length = 36)
-    private UUID keycloakId;
+    private UUID id;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Endereco> enderecos;
@@ -63,11 +63,11 @@ public class Usuario {
     private Reputacao reputacao;
 
     @Column(name = "data_criacao", updatable = false)
-    private OffsetDateTime dataCriacao;
+    private Instant dataCriacao;
 
     @Column(name = "data_ultimo_login")
-    private OffsetDateTime ultimoLogin;
+    private Instant ultimoLogin;
 
     @Column(name = "data_atualizacao")
-    private OffsetDateTime dataAtualizacao;
+    private Instant dataAtualizacao;
 }

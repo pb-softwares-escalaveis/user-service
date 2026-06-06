@@ -3,9 +3,13 @@ package com.br.infnet.userservice.service;
 import com.br.infnet.userservice.domain.Reputacao;
 import com.br.infnet.userservice.domain.Usuario;
 import com.br.infnet.userservice.dto.*;
+import com.br.infnet.userservice.dto.events.UserCreatedEvent;
+import com.br.infnet.userservice.dto.events.UserDeletedEvent;
 import com.br.infnet.userservice.enums.Status;
-import com.br.infnet.userservice.exceptions.EntidadeNotFoundException;
+import com.br.infnet.userservice.exceptions.UsuarioNaoAutenticadoException;
+import com.br.infnet.userservice.exceptions.UsuarioNotFoundException;
 import com.br.infnet.userservice.exceptions.UsuarioMenorDeIdadeException;
+import com.br.infnet.userservice.kafka.UserKafkaProducer;
 import com.br.infnet.userservice.mapper.UsuarioMapper;
 import com.br.infnet.userservice.repository.UsuarioRepository;
 import jakarta.ws.rs.core.Response;
@@ -21,9 +25,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import com.br.infnet.userservice.utils.UsernameGenerator;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,23 +41,25 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
     private final Keycloak keycloak;
+    private final UserKafkaProducer kafkaProducer;
 
     @Value("${keycloak.realm}")
     private String realm;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
-                          UsuarioMapper usuarioMapper, Keycloak keycloak) {
+                          UsuarioMapper usuarioMapper, Keycloak keycloak, UserKafkaProducer kafkaProducer) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
         this.keycloak = keycloak;
+        this.kafkaProducer = kafkaProducer;
     }
 
     @Cacheable(value = "perfil", key = "#id")
     public UsuarioProfileResponse getUsuarioProfileById(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntidadeNotFoundException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
         if (usuario.getStatus() == Status.INATIVO) {
-            throw new EntidadeNotFoundException("Usuário não encontrado com o ID: " + id);
+            throw new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id);
         }
         return usuarioMapper.toProfileResponse(usuario);
     }
@@ -60,18 +67,18 @@ public class UsuarioService {
     @Cacheable(value = "user-info", key = "#id")
     public UsuarioResponse getUsuarioInfoById(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntidadeNotFoundException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
         if (usuario.getStatus() == Status.INATIVO) {
-            throw new EntidadeNotFoundException("Usuário não encontrado com o ID: " + id);
+            throw new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id);
         }
         return usuarioMapper.toResponse(usuario);
     }
 
     public UsuarioStatusResponse getUsuarioStatusById(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntidadeNotFoundException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
         if (usuario.getStatus() == Status.INATIVO) {
-            throw new EntidadeNotFoundException("Usuário não encontrado com o ID: " + id);
+            throw new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id);
         }
         return new UsuarioStatusResponse(usuario.getStatus());
     }
@@ -79,25 +86,38 @@ public class UsuarioService {
     @Cacheable(value = "vendedor-info", key = "#id")
     public VendedorResponseInfo getVendedorInfoById(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntidadeNotFoundException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
         if (usuario.getStatus() == Status.INATIVO) {
-            throw new EntidadeNotFoundException("Usuário não encontrado com o ID: " + id);
+            throw new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id);
         }
         return usuarioMapper.toVendedorResponseInfo(usuario);
     }
 
-    public void criarUsuario(UsuarioCreationRequest request) {
+    @Transactional
+    public UsuarioCreationResponse criarUsuario(UsuarioCreationRequest request) {
         LocalDate dataAtual = LocalDate.now();
         LocalDate dataNascimento = request.dataNascimento();
 
+        if (usuarioRepository.existsByUsername(request.username())) {
+            throw new IllegalArgumentException("Username já existe: " + request.username());
+        }
+
+        if (usuarioRepository.existsByEmail(request.email())) {
+            throw new IllegalArgumentException("Email já cadastrado: " + request.email());
+        }
+
+        if(usuarioRepository.existsByCpf(request.cpf())) {
+            throw new IllegalArgumentException("CPF já cadastrado: " + request.cpf());
+        }
+
         if (Period.between(dataNascimento, dataAtual).getYears() < 18) {
-            throw new UsuarioMenorDeIdadeException("Cadastro não permitido: O usuário deve ter 18 anos ou mais.");
+            throw new UsuarioMenorDeIdadeException("Cadastro não permitido: Você deve ter 18 anos ou mais.");
         }
 
         UUID keycloakId = criarUsuarioViaKeycloakAPI(request);
 
         Usuario novoUsuario = usuarioMapper.toEntity(request);
-        novoUsuario.setKeycloakId(keycloakId);
+        novoUsuario.setId(keycloakId);
 
         Reputacao reputacao = new Reputacao();
         reputacao.setMarks(3);
@@ -107,33 +127,64 @@ public class UsuarioService {
         novoUsuario.setReputacao(reputacao);
 
         usuarioRepository.save(novoUsuario);
+
+        UserCreatedEvent eventoCriacao = new UserCreatedEvent(
+                UUID.randomUUID(),
+                novoUsuario.getId(),
+                novoUsuario.getNome(),
+                novoUsuario.getEmail(),
+                Instant.now()
+        );
+
+       try {
+            kafkaProducer.sendUserCreated(eventoCriacao).get(20, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException("Falha ao enviar evento de criação para o Kafka", e);
+        }
+        return new UsuarioCreationResponse(novoUsuario.getId());
     }
 
+    @Transactional
     @CacheEvict(value = {"perfil", "user-info", "vendedor-info"}, key = "#id")
     public void deletarUsuario(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntidadeNotFoundException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
         if (usuario.getStatus() == Status.INATIVO) {
             return;
         }
         usuario.setStatus(Status.INATIVO);
-        usuario.setDataAtualizacao(OffsetDateTime.now());
+        usuario.setDataAtualizacao(Instant.now());
         usuarioRepository.save(usuario);
+
+        UserDeletedEvent eventoDelecao = new UserDeletedEvent(
+                UUID.randomUUID(),
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail(),
+                Instant.now()
+        );
+
+        try {
+            kafkaProducer.sendUserDeleted(eventoDelecao).get(20, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException("Falha ao enviar evento de deleção para o Kafka", e);
+        }
     }
 
+    @Transactional
     @CacheEvict(value = "perfil", allEntries = true)
     public void alterarFotoDePerfil(String urlNovaFoto) {
         JwtAuthenticationToken auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
-            throw new EntidadeNotFoundException("Não Autenticado!");
+            throw new UsuarioNaoAutenticadoException("Usuário não autenticado!");
         }
         String keycloakId = auth.getToken().getClaimAsString("sub");
 
         Usuario usuario = usuarioRepository.findById(UUID.fromString(keycloakId))
-                .orElseThrow(() -> new EntidadeNotFoundException("Usuário não encontrado no banco de dados!"));
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado no banco de dados!"));
 
         usuario.setFotoPerfil(urlNovaFoto);
-        usuario.setDataAtualizacao(OffsetDateTime.now());
+        usuario.setDataAtualizacao(Instant.now());
 
         usuarioRepository.save(usuario);
     }
