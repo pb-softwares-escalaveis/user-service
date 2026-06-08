@@ -61,7 +61,7 @@ public class UserKafkaConsumer {
         usuarioRepository.save(usuario);
 
         Instant suspendedUntil = event.occurredAt().plus(event.days(), ChronoUnit.DAYS);
-        log.info("Usuário {} suspenso até {} com {} marks", usuario.getUsername(), suspendedUntil, marks);
+        log.info("Usuário {} suspenso até {}", usuario.getUsername(), suspendedUntil);
 
         UserSuspendedEvent eventoSuspensao = new UserSuspendedEvent(
                 UUID.randomUUID(),
@@ -74,7 +74,7 @@ public class UserKafkaConsumer {
         );
 
         try {
-            kafkaProducer.sendUserSuspended(eventoSuspensao).get(20, TimeUnit.SECONDS);
+            kafkaProducer.sendUserSuspended(eventoSuspensao).get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException("Falha ao enviar evento de suspensão para o Kafka", e);
         }
@@ -105,7 +105,7 @@ public class UserKafkaConsumer {
         );
 
         try {
-            kafkaProducer.sendUserBanned(eventoBanimento).get(20, TimeUnit.SECONDS);
+            kafkaProducer.sendUserBanned(eventoBanimento).get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new RuntimeException("Falha ao enviar evento de banimento para o Kafka", e);
         }
