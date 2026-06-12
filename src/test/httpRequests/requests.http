@@ -32,19 +32,44 @@ Content-Type: application/json
   ]
 }
 
+### Criar Outro Usuário (Gera registro no Keycloak e no Postgres)
+POST http://localhost:8080/usuarios/novo
+Content-Type: application/json
+
+{
+  "nome": "Larissa",
+  "sobrenome": "Conti",
+  "email": "larissaconti@email.com",
+  "cpf": "14009481773",
+  "dataNascimento": "1995-07-20",
+  "telefone": "21987766555",
+  "username": "larissaPrime196",
+  "senha": "SenhaForte@123",
+  "enderecos": [
+    {
+      "pais": "Brasil",
+      "estado": "SP",
+      "cidade": "São Paulo",
+      "bairro": "Pinheiros",
+      "rua": "Rua das Flores",
+      "numero": "100",
+      "cep": "05422-000"
+    }
+  ]
+}
+
 ### Obter Perfil do Usuário por ID (UUID)
-GET http://localhost:8080/usuarios/{{ID_DO_USUARIO}}/perfil
+GET http://localhost:8080/usuarios/6009694b-0958-4ffd-a480-928eef180184/perfil
 Accept: application/json
 
-### Alterar Foto de Perfil
-PUT http://localhost:8080/usuarios/trocar-pfp
-Content-Type: text/plain
-
-"http://localhost:9000/usuarios/novo-avatar.jpg"
+### Obter status do usuário através do IDs (UUIDs separados por vírgula)
+GET http://localhost:8080/usuarios/status?ids=17fda6b0-84b0-4553-85b8-5dca56a0e888,6009694b-0958-4ffd-a480-928eef180184
+Accept: application/json
 
 ### Consultar Informações do Vendedor
+@ID_DO_USUARIO = 6009694b-0958-4ffd-a480-928eef180184
 GET http://localhost:8080/usuarios/{{ID_DO_USUARIO}}/seller-info
 Accept: application/json
 
 ### Deletar (Inativar) Usuário
-DELETE http://localhost:8080/usuarios/{{ID_DO_USUARIO}}
+DELETE http://localhost:8080/usuarios/1f23b13f-c7b0-4a10-8366-55db05c134c2
