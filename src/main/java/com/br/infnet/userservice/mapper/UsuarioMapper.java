@@ -1,6 +1,7 @@
 package com.br.infnet.userservice.mapper;
 
 import com.br.infnet.userservice.domain.Endereco;
+import com.br.infnet.userservice.domain.Reputacao;
 import com.br.infnet.userservice.domain.Usuario;
 import com.br.infnet.userservice.dto.UsuarioCreationRequest;
 import com.br.infnet.userservice.dto.UsuarioProfileResponse;
@@ -23,7 +24,7 @@ public class UsuarioMapper {
 
         Float valorReputacao = null;
         if (usuario.getReputacao() != null) {
-            valorReputacao = usuario.getReputacao().getReputacao();
+            valorReputacao = usuario.getReputacao().getNota();
         }
 
         return new UsuarioProfileResponse(
@@ -66,9 +67,13 @@ public class UsuarioMapper {
                         novoEndereco.setUsuario(novoUsuario);
                         return novoEndereco;
                     }).toList();
-
             novoUsuario.setEnderecos(listaEnderecos);
         }
+        Reputacao reputacaoInicial = new Reputacao();
+        reputacaoInicial.setUsuario(novoUsuario);
+        reputacaoInicial.setMarks(3);
+        reputacaoInicial.setNota(5.0f);
+        novoUsuario.setReputacao(reputacaoInicial);
         return novoUsuario;
     }
 
@@ -78,25 +83,29 @@ public class UsuarioMapper {
     public VendedorResponseInfo toVendedorResponseInfo(Usuario usuario) {
         if (usuario == null) return null;
 
-        Float valorReputacao = null;
+        Float notaReputacao = null;
         if (usuario.getReputacao() != null) {
-            valorReputacao = usuario.getReputacao().getReputacao();
+            notaReputacao = usuario.getReputacao().getNota();
         }
 
         String cidade = null;
         String pais = null;
+        String estado = null;
         if (usuario.getEnderecos() != null && !usuario.getEnderecos().isEmpty()) {
             Endereco enderecoPrincipal = usuario.getEnderecos().getFirst();
             cidade = enderecoPrincipal.getCidade();
             pais = enderecoPrincipal.getPais();
+            estado = enderecoPrincipal.getEstado();
         }
 
         return new VendedorResponseInfo(
                 usuario.getNome(),
                 usuario.getSobrenome(),
                 usuario.getUsername(),
-                valorReputacao,
+                usuario.getFotoPerfil(),
+                notaReputacao,
                 cidade,
+                estado,
                 pais
         );
     }

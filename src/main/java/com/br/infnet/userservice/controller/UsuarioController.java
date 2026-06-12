@@ -4,6 +4,7 @@ import com.br.infnet.userservice.dto.*;
 import com.br.infnet.userservice.service.UsuarioService;
 import com.br.infnet.userservice.storage.BucketStorageService;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.PathParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -90,10 +91,11 @@ public class UsuarioController {
     }*/
 
     //**ENDPOINTS PARA OUTROS MICROSSERVIÇOS **//
-    @GetMapping("/{id}/status")
-    public ResponseEntity<UsuarioStatusResponse> getUsuarioStatusById(@PathVariable UUID id) {
-        UsuarioStatusResponse response = usuarioService.getUsuarioStatusById(id);
-        return ResponseEntity.ok(response);
+    @GetMapping("/status")
+    public ResponseEntity<List<UsuarioStatusResponse>> getUsuariosStatusByIds(
+            @RequestParam List<UUID> ids) {
+        List<UsuarioStatusResponse> responses = usuarioService.getUsuariosStatusByIds(ids);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}/seller-info")

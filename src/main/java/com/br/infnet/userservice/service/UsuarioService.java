@@ -1,6 +1,5 @@
 package com.br.infnet.userservice.service;
 
-import com.br.infnet.userservice.domain.Reputacao;
 import com.br.infnet.userservice.domain.Usuario;
 import com.br.infnet.userservice.dto.*;
 import com.br.infnet.userservice.dto.events.UserCreatedEvent;
@@ -26,14 +25,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import com.br.infnet.userservice.utils.UsernameGenerator;
 import org.springframework.transaction.annotation.Transactional;
+import com.br.infnet.userservice.mapper.UserEventMapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UsuarioService {
@@ -42,16 +39,18 @@ public class UsuarioService {
     private final UsuarioMapper usuarioMapper;
     private final Keycloak keycloak;
     private final UserKafkaProducer kafkaProducer;
+    private final UserEventMapper userEventMapper;
 
     @Value("${keycloak.realm}")
     private String realm;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
-                          UsuarioMapper usuarioMapper, Keycloak keycloak, UserKafkaProducer kafkaProducer) {
+                          UsuarioMapper usuarioMapper, Keycloak keycloak, UserKafkaProducer kafkaProducer, UserEventMapper userEventMapper) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
         this.keycloak = keycloak;
         this.kafkaProducer = kafkaProducer;
+        this.userEventMapper = userEventMapper;
     }
 
     @Cacheable(value = "perfil", key = "#id")
@@ -74,15 +73,25 @@ public class UsuarioService {
         return usuarioMapper.toResponse(usuario);
     }
 
-    public UsuarioStatusResponse getUsuarioStatusById(UUID id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
-        if (usuario.getStatus() == Status.INATIVO) {
-            throw new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id);
+    public List<UsuarioStatusResponse> getUsuariosStatusByIds(List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
         }
-        return new UsuarioStatusResponse(usuario.getStatus());
+
+        List<UUID> uniqueIds = ids.stream().distinct().toList();
+        List<Usuario> usuarios = usuarioRepository.findAllById(uniqueIds);
+
+        return usuarios.stream()
+                .filter(usuario -> usuario.getStatus() != Status.INATIVO)
+                .map(usuario -> new UsuarioStatusResponse(
+                        usuario.getId(),
+                        usuario.getStatus(),
+                        isAllowed(usuario)
+                ))
+                .toList();
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(value = "vendedor-info", key = "#id")
     public VendedorResponseInfo getVendedorInfoById(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
@@ -118,23 +127,9 @@ public class UsuarioService {
 
         Usuario novoUsuario = usuarioMapper.toEntity(request);
         novoUsuario.setId(keycloakId);
-
-        Reputacao reputacao = new Reputacao();
-        reputacao.setMarks(3);
-        reputacao.setReputacao(5.0f);
-        reputacao.setDataUltimaPunicao(null);
-        reputacao.setUsuario(novoUsuario);
-        novoUsuario.setReputacao(reputacao);
-
         usuarioRepository.save(novoUsuario);
 
-        UserCreatedEvent eventoCriacao = new UserCreatedEvent(
-                UUID.randomUUID(),
-                novoUsuario.getId(),
-                novoUsuario.getNome(),
-                novoUsuario.getEmail(),
-                Instant.now()
-        );
+        UserCreatedEvent eventoCriacao = userEventMapper.toUserCreatedEvent(novoUsuario);
 
        try {
             kafkaProducer.sendUserCreated(eventoCriacao).get(20, java.util.concurrent.TimeUnit.SECONDS);
@@ -280,5 +275,12 @@ public class UsuarioService {
         userKc.setEnabled(true);
         userKc.setCredentials(Collections.singletonList(credential));
         return userKc;
+    }
+
+    private boolean isAllowed(Usuario usuario) {
+        if (usuario == null) {
+            return false;
+        }
+        return usuario.getStatus() == Status.ATIVO;
     }
 }
