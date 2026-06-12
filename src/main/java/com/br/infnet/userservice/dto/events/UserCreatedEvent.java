@@ -6,7 +6,18 @@ import java.util.UUID;
 public record UserCreatedEvent(
         UUID correlationId,
         UUID userId,
-        String name,
+        String nome,
+        String sobrenome,
+        String username,
+        String fotoPerfil,
         String email,
-        Instant ocurredAt
-) {}
+        String cpf,
+        String telefone,
+        float nota,
+        String pais,
+        String estado,
+        String cidade,
+        String cep,
+        Instant occurredAt
+) {
+}
