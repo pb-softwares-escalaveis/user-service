@@ -1,9 +1,6 @@
 package com.br.infnet.userservice.kafka;
 
-import com.br.infnet.userservice.dto.events.UserBannedEvent;
-import com.br.infnet.userservice.dto.events.UserCreatedEvent;
-import com.br.infnet.userservice.dto.events.UserDeletedEvent;
-import com.br.infnet.userservice.dto.events.UserSuspendedEvent;
+import com.br.infnet.userservice.dto.events.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +51,16 @@ public class UserKafkaProducer {
             return kafkaTemplate.send("users.account.banned", event.userId().toString(), json);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao serializar evento", e);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public CompletableFuture<SendResult<String, String>> sendUserUnsuspended(UserBackFromSuspensionEvent event) {
+        try {
+            String json = objectMapper.writeValueAsString(event);
+            return kafkaTemplate.send("users.account.restored", event.userId().toString(), json);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao serializar evento de reativação", e);
         }
     }
 }

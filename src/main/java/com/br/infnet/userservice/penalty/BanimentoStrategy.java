@@ -26,6 +26,6 @@ public class BanimentoStrategy implements PenaltyStrategy {
 
     @Override
     public String getLogMessage(Usuario usuario) {
-        return String.format("Usuário %s banido permanentemente (marks 1→0)", usuario.getUsername());
+        return String.format("Usuário %s banido permanentemente (marks 1 → 0)", usuario.getUsername());
     }
 }
