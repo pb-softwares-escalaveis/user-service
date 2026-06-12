@@ -4,7 +4,9 @@ public record VendedorResponseInfo (
     String nome,
     String sobrenome,
     String username,
-    Float reputacao,
+    String fotoPerfil,
+    Float nota,
     String cidade,
+    String estado,
     String pais
     ) {}
