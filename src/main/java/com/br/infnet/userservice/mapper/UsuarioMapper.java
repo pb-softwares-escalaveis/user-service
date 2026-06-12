@@ -120,7 +120,8 @@ public class UsuarioMapper {
                 usuario.getSobrenome(),
                 usuario.getCpf(),
                 usuario.getEmail(),
-                usuario.getTelefone()
+                usuario.getTelefone(),
+                usuario.getStatus() == Status.ATIVO
         );
     }
 }

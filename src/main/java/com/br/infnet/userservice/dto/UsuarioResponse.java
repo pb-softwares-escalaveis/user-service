@@ -5,6 +5,7 @@ public record UsuarioResponse(
     String sobrenome,
     String cpf,
     String email,
-    String telefone
+    String telefone,
+    boolean isAllowed
 ) {
 }
