@@ -9,10 +9,6 @@ RUN ./mvnw clean package -DskipTests
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
-# Adiciona biblioteca de fuso horário (Timezone)
-RUN apk add --no-cache tzdata
-ENV TZ=America/Sao_Paulo
-
 # Cria um grupo e um usuário de sistema sem privilégios para rodar a aplicação
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
