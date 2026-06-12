@@ -3,9 +3,11 @@ package com.br.infnet.userservice.dto.events;
 import java.time.Instant;
 import java.util.UUID;
 
-public record UserBanEmittedEvent(
+public record TransactionClosedPaymentFailedEvent(
+        UUID correlationId,
+        Long transactionId,
         UUID userId,
-        String reason,
+        Enum status,
         Instant occurredAt
 ) {
 }

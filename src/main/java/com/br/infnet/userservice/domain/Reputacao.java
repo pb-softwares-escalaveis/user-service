@@ -29,7 +29,7 @@ public class Reputacao {
     private Usuario usuario;
 
     @Column(name = "marks", nullable = false)
-    private int marks;
+    private Integer marks;
 
     @Column(name = "nota", nullable = false)
     private float nota;

@@ -3,11 +3,11 @@ package com.br.infnet.userservice.dto.events;
 import java.time.Instant;
 import java.util.UUID;
 
-public record UserBannedEvent(
+public record AuctionReportApprovedEvent(
         UUID correlationId,
-        UUID userId,
-        String name,
-        String email,
+        Long auctionId,
+        UUID sellerId,
         String reason,
         Instant occurredAt
-) {}
+) {
+}
