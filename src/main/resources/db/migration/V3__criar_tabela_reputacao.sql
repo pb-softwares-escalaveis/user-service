@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS usuarios.tb_reputacao
     user_id             uuid UNIQUE NOT NULL,
     marks               INT           NOT NULL DEFAULT 3,
     nota           FLOAT         NOT NULL DEFAULT 5.0,
-    data_ultima_punicao TIMESTAMPTZ,
-    suspenso_ate TIMESTAMPTZ,
+    data_ultima_punicao TIMESTAMP,
+    suspenso_ate TIMESTAMP,
 
     CONSTRAINT fk_reputacao_usuario FOREIGN KEY (user_id)
         REFERENCES usuarios.tb_usuario (id) ON DELETE CASCADE,

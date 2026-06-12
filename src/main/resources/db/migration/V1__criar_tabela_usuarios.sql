@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS usuarios.tb_usuario
     data_nascimento   DATE                                                                     NOT NULL,
     telefone          VARCHAR(20) UNIQUE                                                       NOT NULL,
     status            VARCHAR(50) check (status in ('ATIVO', 'SUSPENSO', 'BANIDO', 'INATIVO')) NOT NULL DEFAULT 'ATIVO',
-    data_ultimo_login TIMESTAMPTZ,
-    data_criacao      TIMESTAMPTZ                                                                       DEFAULT NOW(),
-    data_atualizacao  TIMESTAMPTZ,
+    data_ultimo_login TIMESTAMP,
+    data_criacao      TIMESTAMP                                                                       DEFAULT NOW(),
+    data_atualizacao  TIMESTAMP,
 
     CONSTRAINT chk_idade_minima CHECK (data_nascimento <= (CURRENT_DATE - interval '18 years')),
     CONSTRAINT chk_nome_length CHECK (char_length(nome) >= 2 AND char_length(nome) <= 50),

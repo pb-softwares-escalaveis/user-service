@@ -10,7 +10,7 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "tb_reputacao", schema = "usuarios", check = {
-        @CheckConstraint(name = "chk_pontos_reputacao", constraint = "reputacao >= 0 AND reputacao <= 5.0"),
+        @CheckConstraint(name = "chk_pontos_nota" , constraint = "nota >= 0 AND nota <= 5.0"),
         @CheckConstraint(name = "chk_marks_positivos", constraint = "marks >= 0 AND marks <= 3")
 })
 @Getter
