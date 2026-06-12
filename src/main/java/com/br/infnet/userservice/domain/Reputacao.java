@@ -31,9 +31,12 @@ public class Reputacao {
     @Column(name = "marks", nullable = false)
     private int marks;
 
-    @Column(name = "reputacao", nullable = false)
-    private float reputacao;
+    @Column(name = "nota", nullable = false)
+    private float nota;
 
-    @Column(name= "data_ultima_punicao")
+    @Column(name = "data_ultima_punicao")
     private Instant dataUltimaPunicao;
+
+    @Column(name = "suspenso_ate")
+    private Instant suspensoAte;
 }
