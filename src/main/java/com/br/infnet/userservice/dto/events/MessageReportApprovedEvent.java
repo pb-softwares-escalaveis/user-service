@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record MessageReportApprovedEvent(
-        String correlationId,
+        UUID correlationId,
         Long auctionId,
         UUID sellerId,
         Long messageId,

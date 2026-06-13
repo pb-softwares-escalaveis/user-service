@@ -63,4 +63,32 @@ public class UserKafkaProducer {
             throw new RuntimeException("Erro ao serializar evento de reativação", e);
         }
     }
+
+    //** Métodos para testar o listener do Kafka **//
+    public CompletableFuture<SendResult<String, String>> sendAuctionReportApproved(AuctionReportApprovedEvent event) {
+        try {
+            String json = objectMapper.writeValueAsString(event);
+            return kafkaTemplate.send("reports.auction.approved", event.sellerId().toString(), json);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao serializar evento de report de leilão", e);
+        }
+    }
+
+    public CompletableFuture<SendResult<String, String>> sendMessageReportApproved(MessageReportApprovedEvent event) {
+        try {
+            String json = objectMapper.writeValueAsString(event);
+            return kafkaTemplate.send("reports.message.approved", event.sellerId().toString(), json);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao serializar evento de report de mensagem", e);
+        }
+    }
+
+    public CompletableFuture<SendResult<String, String>> sendPaymentFailed(TransactionClosedPaymentFailedEvent event) {
+        try {
+            String json = objectMapper.writeValueAsString(event);
+            return kafkaTemplate.send("transactions.status.closed-payment-failed", event.userId().toString(), json);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao serializar evento de falha de pagamento", e);
+        }
+    }
 }

@@ -7,7 +7,6 @@ public record TransactionClosedPaymentFailedEvent(
         UUID correlationId,
         Long transactionId,
         UUID userId,
-        Enum status,
         Instant occurredAt
 ) {
 }

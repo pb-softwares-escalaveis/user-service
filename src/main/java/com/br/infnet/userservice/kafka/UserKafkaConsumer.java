@@ -3,6 +3,7 @@ package com.br.infnet.userservice.kafka;
 import com.br.infnet.userservice.domain.Reputacao;
 import com.br.infnet.userservice.domain.Usuario;
 import com.br.infnet.userservice.dto.events.*;
+import com.br.infnet.userservice.enums.Status;
 import com.br.infnet.userservice.exceptions.UsuarioNotFoundException;
 import com.br.infnet.userservice.penalty.PenaltyFactory;
 import com.br.infnet.userservice.penalty.PenaltyStrategy;
@@ -29,6 +30,11 @@ public class UserKafkaConsumer {
         Usuario usuario = usuarioRepository.findById(userId)
                 .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado: " + userId));
 
+        if (usuario.getStatus() == Status.BANIDO) {
+            log.info("Usuário {} já está banido, ignorando nova penalidade", usuario.getId());
+            return;
+        }
+
         Reputacao reputacao = usuario.getReputacao();
         if (reputacao == null) {
             reputacao = new Reputacao();
@@ -37,6 +43,11 @@ public class UserKafkaConsumer {
 
         int marksAtuais = reputacao.getMarks() != null ? reputacao.getMarks() : 3;
         PenaltyStrategy strategy = penalidadeFactory.getStrategy(marksAtuais);
+
+        if (reputacao.getSuspensoAte() != null && reputacao.getSuspensoAte().isAfter(Instant.now())) {
+            log.warn("Usuário {} está suspenso até {}, mas nova denúncia será acumulada",
+                    usuario.getId(), reputacao.getSuspensoAte());
+        }
 
         strategy.aplicar(usuario, reputacao, reason, ocorridoEm);
         usuarioRepository.save(usuario);
@@ -90,9 +101,9 @@ public class UserKafkaConsumer {
     }
 
     @Transactional
-    @KafkaListener(topics = "transactions.status.closed.payment-failed")
+    @KafkaListener(topics = "transactions.status.closed-payment-failed")
     public void consumePaymentFailedClosed(TransactionClosedPaymentFailedEvent event) {
         log.info("Recebida transação fechada com pagamento expirado transactionId={}", event.transactionId());
-        aplicarPenalidadePorMarks(event.userId(), "Pagamento expirado sem pagamento", event.occurredAt());
+        aplicarPenalidadePorMarks(event.userId(), "Transação expirada por falta de pagamento", event.occurredAt());
     }
 }
