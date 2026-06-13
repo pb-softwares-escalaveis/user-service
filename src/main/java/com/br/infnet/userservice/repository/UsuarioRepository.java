@@ -1,6 +1,7 @@
 package com.br.infnet.userservice.repository;
 
 import com.br.infnet.userservice.domain.Usuario;
+import com.br.infnet.userservice.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -19,4 +20,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
             "WHERE u.status = 'SUSPENSO' " +
             "AND u.reputacao.suspensoAte < CURRENT_TIMESTAMP")
     List<Usuario> findSuspendedUsersWithExpiredSuspension();
+
+    @Query("SELECT u " +
+            "FROM Usuario u " +
+            "WHERE u.status = 'SUSPENSO' ")
+    List<Usuario> findSuspendedUsers(Status status);
 }

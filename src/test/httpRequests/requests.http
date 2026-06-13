@@ -58,18 +58,45 @@ Content-Type: application/json
   ]
 }
 
-### Obter Perfil do Usuário por ID (UUID)
+### Obter perfil de um usuário por ID (UUID)
 GET http://localhost:8080/usuarios/6009694b-0958-4ffd-a480-928eef180184/perfil
 Accept: application/json
 
-### Obter status do usuário através do IDs (UUIDs separados por vírgula)
+### Obter status de vários usuários através dos IDs (UUIDs separados por vírgula)
 GET http://localhost:8080/usuarios/status?ids=17fda6b0-84b0-4553-85b8-5dca56a0e888,6009694b-0958-4ffd-a480-928eef180184
 Accept: application/json
 
-### Consultar Informações do Vendedor
+### Consultar informações do vendedor
 @ID_DO_USUARIO = 6009694b-0958-4ffd-a480-928eef180184
 GET http://localhost:8080/usuarios/{{ID_DO_USUARIO}}/seller-info
 Accept: application/json
 
 ### Deletar (Inativar) Usuário
 DELETE http://localhost:8080/usuarios/1f23b13f-c7b0-4a10-8366-55db05c134c2
+
+### TESTES PARA O SCHEDULER -------------------------------------------------------------
+
+###Verificar usuários suspensos
+GET http://localhost:8080/test/scheduler/suspended
+Accept: application/json
+
+###Forçar reativação de um usuário específico
+@USER_ID_SUSPENSO = b35ccae7-a0db-425d-aebf-518e19e1a518
+POST http://localhost:8080/test/scheduler/restore/{{USER_ID_SUSPENSO}}
+
+###Executar o scheduler manualmente
+POST http://localhost:8080/test/scheduler/run
+
+###Alterar data de suspensão para o passado
+DELETE http://localhost:8080/test/scheduler/suspension-date/{{USER_ID_SUSPENSO}}
+
+### TESTES PARA O KAFKA --------------------------------------------------------------
+
+### Testar tópico reports.auction.approved
+POST http://localhost:8080/test/events/auction-report?userId=b35ccae7-a0db-425d-aebf-518e19e1a518
+
+### Testar tópico reports.message.approved
+POST http://localhost:8080/test/events/message-report?userId=177f201f-4e1a-45a7-8261-286cb94cb3fb
+
+### Testar tópico transactions.status.closed-payment-failed
+POST http://localhost:8080/test/events/payment-failed?userId=177f201f-4e1a-45a7-8261-286cb94cb3fb

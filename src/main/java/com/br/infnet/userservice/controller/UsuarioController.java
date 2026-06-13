@@ -4,7 +4,7 @@ import com.br.infnet.userservice.dto.*;
 import com.br.infnet.userservice.service.UsuarioService;
 import com.br.infnet.userservice.storage.BucketStorageService;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.PathParam;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+@Profile({"test", "dev"})
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {

@@ -57,7 +57,7 @@ services:
 
   user-service:
     container_name: user-service
-    image: shyuu7/user-service:2.0.0
+    image: shyuu7/user-service:2.0.1
     restart: always
     ports:
       - "8080:8080"
