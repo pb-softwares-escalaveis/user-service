@@ -17,7 +17,7 @@ Content-Type: application/json
   "cpf": "12345678909",
   "dataNascimento": "1990-05-20",
   "telefone": "11988887777",
-  "username": "ricardoOuro37",
+  "username": "ricardoouro37",
   "senha": "SenhaForte@123",
   "enderecos": [
     {
@@ -43,7 +43,7 @@ Content-Type: application/json
   "cpf": "14009481773",
   "dataNascimento": "1995-07-20",
   "telefone": "21987766555",
-  "username": "larissaPrime196",
+  "username": "larissaprime196",
   "senha": "SenhaForte@123",
   "enderecos": [
     {
@@ -59,15 +59,15 @@ Content-Type: application/json
 }
 
 ### Obter perfil de um usuário por ID (UUID)
-GET http://localhost:8080/usuarios/6009694b-0958-4ffd-a480-928eef180184/perfil
+GET http://localhost:8080/usuarios/b2f9f754-f868-4efe-9548-ebc3c19e8f98/perfil
 Accept: application/json
 
 ### Obter status de vários usuários através dos IDs (UUIDs separados por vírgula)
-GET http://localhost:8080/usuarios/status?ids=17fda6b0-84b0-4553-85b8-5dca56a0e888,6009694b-0958-4ffd-a480-928eef180184
+GET http://localhost:8080/usuarios/status?ids=b2f9f754-f868-4efe-9548-ebc3c19e8f98
 Accept: application/json
 
 ### Consultar informações do vendedor
-@ID_DO_USUARIO = 6009694b-0958-4ffd-a480-928eef180184
+@ID_DO_USUARIO = b2f9f754-f868-4efe-9548-ebc3c19e8f98
 GET http://localhost:8080/usuarios/{{ID_DO_USUARIO}}/seller-info
 Accept: application/json
 
@@ -81,7 +81,7 @@ GET http://localhost:8080/test/scheduler/suspended
 Accept: application/json
 
 ###Forçar reativação de um usuário específico
-@USER_ID_SUSPENSO = b35ccae7-a0db-425d-aebf-518e19e1a518
+@USER_ID_SUSPENSO = 2ecf1893-3836-45cc-8099-3b86b2678240
 POST http://localhost:8080/test/scheduler/restore/{{USER_ID_SUSPENSO}}
 
 ###Executar o scheduler manualmente

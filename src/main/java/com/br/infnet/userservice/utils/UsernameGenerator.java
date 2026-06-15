@@ -25,9 +25,9 @@ public class UsernameGenerator {
             int tipoFormato = random.nextInt(3);
 
             switch (tipoFormato) {
-                case 0 -> sugestao = base + temaEscolhido + numeroAleatorio;
+                case 0 -> sugestao = base + temaEscolhido.toLowerCase() + numeroAleatorio;
                 case 1 -> sugestao = temaEscolhido.toLowerCase() + "_" + base + random.nextInt(99);
-                case 2 -> sugestao = base + numeroAleatorio + temaEscolhido;
+                case 2 -> sugestao = base + numeroAleatorio + temaEscolhido.toLowerCase();
             }
 
             //Evita sugestões repetidas na mesma lista

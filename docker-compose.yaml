@@ -4,7 +4,7 @@ volumes:
 
 services:
   postgres:
-    container_name: user-service-postgres
+    container_name: postgres
     image: postgres:17-alpine3.23
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -24,7 +24,7 @@ services:
       retries: 5
 
   keycloak:
-    container_name: user-service-keycloak
+    container_name: keycloak
     image: quay.io/keycloak/keycloak:26.6.2
     volumes:
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
@@ -57,11 +57,12 @@ services:
 
   user-service:
     container_name: user-service
-    image: shyuu7/user-service:2.0.1
+    image: shyuu7/user-service:latest
     restart: always
     ports:
       - "8080:8080"
     environment:
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/userservicedb
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
@@ -87,7 +88,7 @@ services:
 
   redis:
     image: redis:8.8.0-alpine
-    container_name: user-service-redis
+    container_name: redis
     ports:
       - "6379:6379"
     networks:

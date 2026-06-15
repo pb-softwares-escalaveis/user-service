@@ -35,7 +35,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_SERVER_URL}/realms/leilao-service
+          jwk-set-uri: ${KEYCLOAK_SERVER_URL}/realms/leilao-service/protocol/openid-connect/certs
 
   kafka:
     bootstrap-servers: ${KAFKA_SERVERS}
@@ -44,7 +44,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL}/eureka
+      defaultZone: http://eureka-server:8761/eureka/
     register-with-eureka: true
     fetch-registry: false
   instance:
