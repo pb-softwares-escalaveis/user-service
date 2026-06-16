@@ -2,7 +2,7 @@ package com.br.infnet.userservice.controller;
 
 import com.br.infnet.userservice.dto.events.AuctionReportApprovedEvent;
 import com.br.infnet.userservice.dto.events.MessageReportApprovedEvent;
-import com.br.infnet.userservice.dto.events.TransactionClosedPaymentFailedEvent;
+import com.br.infnet.userservice.dto.events.PaymentFailedEvent;
 import com.br.infnet.userservice.kafka.UserKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,10 +68,11 @@ public class TestEventController {
             @RequestParam UUID userId,
             @RequestParam(defaultValue = "125489") Long transactionId) {
 
-        TransactionClosedPaymentFailedEvent event = new TransactionClosedPaymentFailedEvent(
+        PaymentFailedEvent event = new PaymentFailedEvent(
                 UUID.randomUUID(),
                 transactionId,
                 userId,
+                true,
                 Instant.now()
         );
 

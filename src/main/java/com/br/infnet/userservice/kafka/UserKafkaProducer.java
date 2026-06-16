@@ -83,7 +83,7 @@ public class UserKafkaProducer {
         }
     }
 
-    public CompletableFuture<SendResult<String, String>> sendPaymentFailed(TransactionClosedPaymentFailedEvent event) {
+    public CompletableFuture<SendResult<String, String>> sendPaymentFailed(PaymentFailedEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);
             return kafkaTemplate.send("transactions.status.closed-payment-failed", event.userId().toString(), json);

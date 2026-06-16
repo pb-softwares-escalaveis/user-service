@@ -8,5 +8,5 @@ public record UserDeletedEvent(
         UUID userId,
         String name,
         String email,
-        Instant ocurredAt
+        Instant occurredAt
 ) {}

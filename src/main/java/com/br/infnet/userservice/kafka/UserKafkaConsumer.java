@@ -87,23 +87,25 @@ public class UserKafkaConsumer {
     }
 
     @Transactional
-    @KafkaListener(topics = "reports.auction.approved")
+    @KafkaListener(topics = "reviews.report.auction-approved")
     public void consumeAuctionReportApproved(AuctionReportApprovedEvent event) {
         log.info("Recebido report aprovado para leilão de número auctionId={}", event.auctionId());
         aplicarPenalidadePorMarks(event.sellerId(), event.reason(), event.occurredAt());
     }
 
     @Transactional
-    @KafkaListener(topics = "reports.message.approved")
+    @KafkaListener(topics = "reviews.report.qa-approved")
     public void consumeMessageReportApproved(MessageReportApprovedEvent event) {
         log.info("Recebido report aprovado para mensagem de número messageId={}", event.messageId());
         aplicarPenalidadePorMarks(event.sellerId(), event.reason(), event.occurredAt());
     }
 
     @Transactional
-    @KafkaListener(topics = "transactions.status.closed-payment-failed")
-    public void consumePaymentFailedClosed(TransactionClosedPaymentFailedEvent event) {
-        log.info("Recebida transação fechada com pagamento expirado transactionId={}", event.transactionId());
-        aplicarPenalidadePorMarks(event.userId(), "Transação expirada por falta de pagamento", event.occurredAt());
+    @KafkaListener(topics = "transactions.status.closed")
+    public void consumePaymentFailedClosed(PaymentFailedEvent event) {
+        if (event.penalty()) {
+            log.info("Transação {} teve falha de pagamento e penalidade será aplicada", event.transactionId());
+            aplicarPenalidadePorMarks(event.userId(), "Transação expirada por falta de pagamento", event.occurredAt());
+        }
     }
 }

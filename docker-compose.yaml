@@ -1,6 +1,8 @@
 volumes:
     postgres_data:
       name: user-service-db-volume
+    keycloak_data:
+      name: keycloak-data-volume
 
 services:
   postgres:
@@ -27,6 +29,7 @@ services:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:26.6.2
     volumes:
+      - keycloak_data:/opt/keycloak/data
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
