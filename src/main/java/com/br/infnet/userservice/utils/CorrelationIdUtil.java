@@ -1,0 +1,53 @@
+package com.br.infnet.userservice.utils;
+
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.UUID;
+
+@Slf4j
+public class CorrelationIdUtil {
+
+    private static final String CORRELATION_ID_MDC = "correlationId";
+    private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
+
+    public static String getCorrelationId() {
+        String correlationId = MDC.get(CORRELATION_ID_MDC);
+        if (correlationId == null || correlationId.isEmpty()) {
+            correlationId = getCorrelationIdFromRequest();
+        }
+        return correlationId;
+    }
+
+    public static UUID getCorrelationIdAsUUID() {
+        String correlationId = getCorrelationId();
+        if (correlationId != null && !correlationId.isEmpty()) {
+            try {
+                return UUID.fromString(correlationId);
+            } catch (IllegalArgumentException e) {
+                return UUID.randomUUID();
+            }
+        }
+        return UUID.randomUUID();
+    }
+
+    public static String generateCorrelationId() {
+        return UUID.randomUUID().toString();
+    }
+
+    private static String getCorrelationIdFromRequest() {
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                return request.getHeader(CORRELATION_ID_HEADER);
+            }
+        } catch (Exception e) {
+            log.warn("Não foi possível obter o Correlation ID do contexto da requisição: {}", e.getMessage(), e);
+        }
+        return null;
+    }
+}

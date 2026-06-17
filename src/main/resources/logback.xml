@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- ============================================================
+         PROPRIEDADES
+    ============================================================ -->
+    <springProperty
+            scope="context"
+            name="APP_NAME"
+            source="spring.application.name"
+            defaultValue="user-service"/>
+
+    <!-- ============================================================
+         PATTERNS
+    ============================================================ -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) [%X{correlationId}] [${APP_NAME}] %logger{36} - %msg%n"/>
+
+    <property name="LOGSTASH_LOG_PATTERN"
+              value='{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","service":"${APP_NAME}","correlationId":"%X{correlationId}","thread":"%thread","logger":"%logger{36}","message":"%msg"}%n'/>
+
+    <!-- ============================================================
+         APPENDERS
+    ============================================================ -->
+
+    <!-- CONSOLE -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+
+    <!-- LOGSTASH -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${LOGSTASH_HOST:-localhost}:${LOGSTASH_PORT:-5000}</destination>
+        <keepAliveDuration>5 minutes</keepAliveDuration>
+        <reconnectionDelay>10 seconds</reconnectionDelay>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service":"${APP_NAME}","environment":"${ENVIRONMENT:-local}"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- ============================================================
+         LOGGERS
+    ============================================================ -->
+
+    <!-- Root Logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="LOGSTASH"/>
+    </root>
+
+    <!-- Logs da aplicação em DEBUG -->
+    <logger name="com.br.infnet.userservice" level="DEBUG"/>
+    <logger name="com.br.infnet.userservice.kafka" level="DEBUG"/>
+
+    <!--Suprimir logs de bibliotecas -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="org.keycloak" level="WARN"/>
+</configuration>

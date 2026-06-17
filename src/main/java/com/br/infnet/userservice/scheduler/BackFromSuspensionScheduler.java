@@ -5,6 +5,7 @@ import com.br.infnet.userservice.dto.events.UserBackFromSuspensionEvent;
 import com.br.infnet.userservice.enums.Status;
 import com.br.infnet.userservice.kafka.UserKafkaProducer;
 import com.br.infnet.userservice.repository.UsuarioRepository;
+import com.br.infnet.userservice.utils.CorrelationIdUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -52,8 +53,9 @@ public class BackFromSuspensionScheduler {
 
         log.info("Usuário {} (ID: {}) foi reativado", usuario.getUsername(), usuario.getId());
 
+        UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
         UserBackFromSuspensionEvent event = new UserBackFromSuspensionEvent(
-                UUID.randomUUID(),
+                correlationId,
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),

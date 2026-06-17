@@ -35,7 +35,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${KEYCLOAK_SERVER_URL}/realms/leilao-service/protocol/openid-connect/certs
+          jwk-set-uri: ${KEYCLOAK_INTERNAL_URL}/realms/leilao-service/protocol/openid-connect/certs
 
   kafka:
     bootstrap-servers: ${KAFKA_SERVERS}
@@ -72,10 +72,10 @@ info:
     description: User Service do O Leiloeiro Online
 
 keycloak:
-  server-url: ${KEYCLOAK_SERVER_URL}
+  server-url: ${KEYCLOAK_INTERNAL_URL}
   realm: leilao-service
   client-id: user-service-client
-  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET_USER_SERVICE}
 
 s3:
   endpoint: ${S3_ENDPOINT}

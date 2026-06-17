@@ -11,7 +11,9 @@ import com.br.infnet.userservice.exceptions.UsuarioMenorDeIdadeException;
 import com.br.infnet.userservice.kafka.UserKafkaProducer;
 import com.br.infnet.userservice.mapper.UsuarioMapper;
 import com.br.infnet.userservice.repository.UsuarioRepository;
+import com.br.infnet.userservice.utils.CorrelationIdUtil;
 import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -32,6 +34,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
 
+@Slf4j
 @Service
 public class UsuarioService {
 
@@ -104,6 +107,8 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioCreationResponse criarUsuario(UsuarioCreationRequest request) {
+        UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
+        log.info("[{}] Iniciando criação de usuário: {}", correlationId, request.email());
         LocalDate dataAtual = LocalDate.now();
         LocalDate dataNascimento = request.dataNascimento();
 
@@ -124,10 +129,12 @@ public class UsuarioService {
         }
 
         UUID keycloakId = criarUsuarioViaKeycloakAPI(request);
+        log.info("[{}] Usuário criado no Keycloak: {}", correlationId, keycloakId);
 
         Usuario novoUsuario = usuarioMapper.toEntity(request);
         novoUsuario.setId(keycloakId);
         usuarioRepository.save(novoUsuario);
+        log.info("[{}] Usuário salvo no banco: {}", correlationId, novoUsuario.getId());
 
         UserCreatedEvent eventoCriacao = userEventMapper.toUserCreatedEvent(novoUsuario);
 
@@ -142,6 +149,8 @@ public class UsuarioService {
     @Transactional
     @CacheEvict(value = {"perfil", "user-info", "vendedor-info"}, key = "#id")
     public void deletarUsuario(UUID id) {
+        UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
+        log.info("[{}] Iniciando deleção de usuário: {}", correlationId, id);
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
         if (usuario.getStatus() == Status.INATIVO) {
