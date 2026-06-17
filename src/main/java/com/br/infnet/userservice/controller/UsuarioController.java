@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Profile({"test", "dev"})
@@ -23,14 +22,6 @@ public class UsuarioController {
     public UsuarioController(UsuarioService usuarioService, BucketStorageService storageService) {
         this.usuarioService = usuarioService;
         this.storageService = storageService;
-    }
-    @GetMapping("/me")
-    public Map<String, String> me(@RequestHeader("X-User-Id") String userId,
-                                  @RequestHeader("X-User-Email") String email,
-                                  @RequestHeader("X-User-Nome") String nome,
-                                  @RequestHeader("X-User-Status") String status,
-                                  @RequestHeader("X-User-Allowed") String allowed) {
-        return Map.of("userId", userId, "email", email, "nome", nome, "status", status, "allowed", allowed);
     }
 
     //**CRUD USUÁRIO**//
