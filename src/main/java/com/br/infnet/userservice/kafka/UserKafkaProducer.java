@@ -86,7 +86,7 @@ public class UserKafkaProducer {
     public CompletableFuture<SendResult<String, String>> sendPaymentFailed(PaymentFailedEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);
-            return kafkaTemplate.send("transactions.status.closed-payment-failed", event.userId().toString(), json);
+            return kafkaTemplate.send("transactions.status.closed-payment-failed", event.highestBidderId().toString(), json);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao serializar evento de falha de pagamento", e);
         }

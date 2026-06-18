@@ -6,7 +6,7 @@ import java.util.UUID;
 public record PaymentFailedEvent(
         UUID correlationId,
         Long transactionId,
-        UUID userId,
+        UUID highestBidderId,
         boolean penalty,
         Instant occurredAt
 ) {

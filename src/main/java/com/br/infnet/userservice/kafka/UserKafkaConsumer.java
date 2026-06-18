@@ -146,8 +146,8 @@ public class UserKafkaConsumer {
             log.info("Transação {} com falha de pagamento, correlationId={}",
                     event.transactionId(), correlationId);
             if (event.penalty()) {
-                log.info("Penalidade será aplicada para usuário: {}", event.userId());
-                aplicarPenalidadePorMarks(event.userId(), "Transação expirada por falta de pagamento",
+                log.info("Penalidade será aplicada para usuário: {}", event.highestBidderId());
+                aplicarPenalidadePorMarks(event.highestBidderId(), "Transação expirada por falta de pagamento",
                         event.occurredAt(), correlationId);
             }
         } finally {

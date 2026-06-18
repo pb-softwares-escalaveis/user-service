@@ -65,18 +65,18 @@ public class TestEventController {
 
     @PostMapping("/payment-failed")
     public ResponseEntity<String> sendPaymentFailed(
-            @RequestParam UUID userId,
+            @RequestParam UUID highestBidderId,
             @RequestParam(defaultValue = "125489") Long transactionId) {
 
         PaymentFailedEvent event = new PaymentFailedEvent(
                 UUID.randomUUID(),
                 transactionId,
-                userId,
+                highestBidderId,
                 true,
                 Instant.now()
         );
 
-        log.info("Enviando evento de falha de pagamento: userId={}", userId);
+        log.info("Enviando evento de falha de pagamento: userId={}", highestBidderId);
         kafkaProducer.sendPaymentFailed(event);
 
         return ResponseEntity.ok("Evento enviado com sucesso!");
