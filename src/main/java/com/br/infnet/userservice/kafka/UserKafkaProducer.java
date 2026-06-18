@@ -65,7 +65,7 @@ public class UserKafkaProducer {
     }
 
     //** Métodos para testar o listener do Kafka **//
-    /*public CompletableFuture<SendResult<String, String>> sendAuctionReportApproved(AuctionReportApprovedEvent event) {
+    public CompletableFuture<SendResult<String, String>> sendAuctionReportApproved(AuctionReportApprovedEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);
             return kafkaTemplate.send("reports.auction.approved", event.sellerId().toString(), json);
@@ -90,5 +90,5 @@ public class UserKafkaProducer {
         } catch (Exception e) {
             throw new RuntimeException("Erro ao serializar evento de falha de pagamento", e);
         }
-    }*/
+    }
 }

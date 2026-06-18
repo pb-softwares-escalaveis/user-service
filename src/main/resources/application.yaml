@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: ${SPRING_DATASOURCE_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    username: ${USER_SERVICE_DB_USER}
+    password: ${USER_SERVICE_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -21,8 +21,8 @@ spring:
     type: redis
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+      host: ${USER_SERVICE_REDIS_HOST}
+      port: ${USER_SERVICE_REDIS_PORT}
       repositories:
         enabled: false
 
@@ -40,11 +40,10 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_SERVERS}
 
-
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: ${EUREKA_SERVER_URL}
     register-with-eureka: true
     fetch-registry: false
   instance:
@@ -79,6 +78,6 @@ keycloak:
 
 s3:
   endpoint: ${S3_ENDPOINT}
-  bucket-name: ${S3_BUCKET_NAME}
+  bucket-name: ${USER_SERVICE_S3_BUCKET_NAME}
   access-key: ${S3_ACCESS_KEY}
   secret-key: ${S3_SECRET_KEY}
