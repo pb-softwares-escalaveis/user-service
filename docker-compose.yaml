@@ -39,7 +39,7 @@ services:
       MAIL_REPLY_TO: ${MAIL_REPLY_TO}
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
-      KC_DB: postgres
+      KC_DB: user-service-db
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloakdb
       KC_DB_USERNAME: ${USER_SERVICE_DB_USER}
       KC_DB_PASSWORD: ${USER_SERVICE_DB_PASSWORD}
