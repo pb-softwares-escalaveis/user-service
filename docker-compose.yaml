@@ -5,8 +5,8 @@ volumes:
       name: keycloak-data-volume
 
 services:
-  postgres:
-    container_name: postgres-user-service
+  user-service-db:
+    container_name: user-service-db
     image: postgres:17-alpine3.23
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -34,11 +34,11 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_FROM: ${SMTP_FROM}
-      SMTP_USER: ${SMTP_USER}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_REPLY_TO: ${MAIL_REPLY_TO}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloakdb
       KC_DB_USERNAME: ${USER_SERVICE_DB_USER}
@@ -84,16 +84,16 @@ services:
     networks:
       - leilao-network
     depends_on:
-      postgres:
+      user-service-db:
         condition: service_healthy
       keycloak:
         condition: service_healthy
-      redis:
+      user-service-redis:
         condition: service_healthy
 
-  redis:
+  user-service-redis:
     image: redis:8.8.0-alpine
-    container_name: redis-user-service
+    container_name: user-service-redis
     ports:
       - "${USER_SERVICE_REDIS_PORT}:6379"
     networks:
