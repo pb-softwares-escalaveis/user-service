@@ -45,10 +45,11 @@ eureka:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
     register-with-eureka: true
-    fetch-registry: false
+    fetch-registry: true
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-    prefer-ip-address: true
+    hostname: ${spring.application.name}
+    prefer-ip-address: false
 
 management:
   endpoints:
