@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()
                 )
-                // Desabilita tudo que exige autenticação
+
                 .oauth2Login(AbstractHttpConfigurer::disable)
                 .oauth2Client(AbstractHttpConfigurer::disable)
                 .oauth2ResourceServer(AbstractHttpConfigurer::disable)
@@ -69,8 +69,7 @@ public class SecurityConfig {
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(Customizer.withDefaults())
-                )
-                .csrf(AbstractHttpConfigurer::disable);
+                );
 
         return http.build();
     }
