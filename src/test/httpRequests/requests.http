@@ -1,13 +1,13 @@
 ### Sugerir Usernames baseado no nome do usuário
-GET http://localhost:8080/usuarios/listar-usernames?nome=Larissa
+GET http://localhost:9999/usuarios/listar-usernames?nome=Larissa
 Accept: application/json
 
 ### Listar Avatares Disponíveis no S3/MinIO
-GET http://localhost:8080/usuarios/listar-pfps
+GET http://localhost:9999/usuarios/listar-pfps
 Accept: application/json
 
 ### Criar Novo Usuário (Gera registro no Keycloak e no Postgres)
-POST http://localhost:8080/usuarios/novo
+POST http://localhost:9999/usuarios/novo
 Content-Type: application/json
 
 {
@@ -33,7 +33,7 @@ Content-Type: application/json
 }
 
 ### Criar Outro Usuário (Gera registro no Keycloak e no Postgres)
-POST http://localhost:8080/usuarios/novo
+POST http://localhost:9999/usuarios/novo
 Content-Type: application/json
 
 {
@@ -59,44 +59,44 @@ Content-Type: application/json
 }
 
 ### Obter perfil de um usuário por ID (UUID)
-GET http://localhost:8080/usuarios/b2f9f754-f868-4efe-9548-ebc3c19e8f98/perfil
+GET http://localhost:9999/usuarios/b2f9f754-f868-4efe-9548-ebc3c19e8f98/perfil
 Accept: application/json
 
 ### Obter status de vários usuários através dos IDs (UUIDs separados por vírgula)
-GET http://localhost:8080/usuarios/status?ids=b2f9f754-f868-4efe-9548-ebc3c19e8f98
+GET http://localhost:9999/usuarios/status?ids=501f22ce-2a94-4218-b47a-74c47b585bc6
 Accept: application/json
 
 ### Consultar informações do vendedor
 @ID_DO_USUARIO = b2f9f754-f868-4efe-9548-ebc3c19e8f98
-GET http://localhost:8080/usuarios/{{ID_DO_USUARIO}}/seller-info
+GET http://localhost:9999/usuarios/{{ID_DO_USUARIO}}/seller-info
 Accept: application/json
 
 ### Deletar (Inativar) Usuário
-DELETE http://localhost:8080/usuarios/1f23b13f-c7b0-4a10-8366-55db05c134c2
+DELETE http://localhost:9999/usuarios/1f23b13f-c7b0-4a10-8366-55db05c134c2
 
 ### TESTES PARA O SCHEDULER -------------------------------------------------------------
 
 ###Verificar usuários suspensos
-GET http://localhost:8080/test/scheduler/suspended
+GET http://localhost:9999/test/scheduler/suspended
 Accept: application/json
 
 ###Forçar reativação de um usuário específico
 @USER_ID_SUSPENSO = 2ecf1893-3836-45cc-8099-3b86b2678240
-POST http://localhost:8080/test/scheduler/restore/{{USER_ID_SUSPENSO}}
+POST http://localhost:9999/test/scheduler/restore/{{USER_ID_SUSPENSO}}
 
 ###Executar o scheduler manualmente
-POST http://localhost:8080/test/scheduler/run
+POST http://localhost:9999/test/scheduler/run
 
 ###Alterar data de suspensão para o passado
-DELETE http://localhost:8080/test/scheduler/suspension-date/{{USER_ID_SUSPENSO}}
+DELETE http://localhost:9999/test/scheduler/suspension-date/{{USER_ID_SUSPENSO}}
 
 ### TESTES PARA O KAFKA --------------------------------------------------------------
 
 ### Testar tópico reports.auction.approved
-POST http://localhost:8080/test/events/auction-report?userId=b35ccae7-a0db-425d-aebf-518e19e1a518
+POST http://localhost:9999/test/events/auction-report?userId=b35ccae7-a0db-425d-aebf-518e19e1a518
 
 ### Testar tópico reports.message.approved
-POST http://localhost:8080/test/events/message-report?userId=177f201f-4e1a-45a7-8261-286cb94cb3fb
+POST http://localhost:9999/test/events/message-report?userId=177f201f-4e1a-45a7-8261-286cb94cb3fb
 
 ### Testar tópico transactions.status.closed-payment-failed
-POST http://localhost:8080/test/events/payment-failed?userId=177f201f-4e1a-45a7-8261-286cb94cb3fb
+POST http://localhost:9999/test/events/payment-failed?userId=177f201f-4e1a-45a7-8261-286cb94cb3fb
