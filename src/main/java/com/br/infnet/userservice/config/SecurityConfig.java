@@ -41,8 +41,6 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
 
-                .oauth2Login(AbstractHttpConfigurer::disable)
-                .oauth2Client(AbstractHttpConfigurer::disable)
                 .oauth2ResourceServer(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable);
 
