@@ -3,7 +3,6 @@ package com.br.infnet.userservice.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,27 +19,24 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        // ========================================
-                        // 1. ENDPOINTS PÚBLICOS
-                        // ========================================
-                        .requestMatchers(HttpMethod.POST, "/usuarios/novo").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/usuarios/{id}/perfil").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/usuarios/{id}/seller-info").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/usuarios/listar-usernames").permitAll()
-                        .requestMatchers("/actuator/**", "/health").permitAll()
+                        // Públicos
+                        .requestMatchers(
+                                "/actuator/**",
+                                "/health",
+                                "/usuarios/novo",
+                                "/usuarios/{id}/perfil",
+                                "/usuarios/{id}/seller-info",
+                                "/usuarios/listar-usernames",
+                                "/usuarios/status",
+                                "/usuarios/{id}"
+                        ).permitAll()
 
-                        // ========================================
-                        // 2. ENDPOINTS INTERNOS (comunicação entre microsserviços)
-                        // ========================================
-                        .requestMatchers(HttpMethod.GET, "/usuarios/status").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/usuarios/{id}").permitAll()
-
-                        // ========================================
-                        // 3. ENDPOINTS PRIVADOS
-                        // ========================================
-                        .requestMatchers(HttpMethod.GET, "/usuarios/listar-pfps").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/usuarios/trocar-pfp").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/usuarios/{id}").authenticated()
+                        //Privados
+                        .requestMatchers(
+                                "/usuarios/listar-pfps",
+                                "/usuarios/trocar-pfp",
+                                "/usuarios/deletar/{id}"
+                        ).authenticated()
 
                         //Fallback
                         .anyRequest().authenticated()

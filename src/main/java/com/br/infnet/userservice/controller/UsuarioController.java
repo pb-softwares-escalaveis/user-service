@@ -38,7 +38,7 @@ public class UsuarioController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<MessageResponse> deletarUsuario(@PathVariable UUID id) {
         usuarioService.deletarUsuario(id);
         return ResponseEntity.ok(new MessageResponse("Usuário desativado com sucesso."));
