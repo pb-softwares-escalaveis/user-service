@@ -3,10 +3,11 @@ package com.br.infnet.userservice.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -14,24 +15,49 @@ import org.springframework.security.web.SecurityFilterChain;
 @Profile("!test")
 public class SecurityConfig {
 
+    // ============================================================
+    // FILTRO PÚBLICO
+    // ============================================================
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) {
+    @Order(1)
+    public SecurityFilterChain publicFilterChain(HttpSecurity http) {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authz -> authz
-                        // Públicos
-                        .requestMatchers(
-                                "/actuator/**",
-                                "/health",
-                                "/usuarios/novo",
-                                "/usuarios/{id}/perfil",
-                                "/usuarios/{id}/seller-info",
-                                "/usuarios/listar-usernames",
-                                "/usuarios/status",
-                                "/usuarios/{id}"
-                        ).permitAll()
+                .securityMatcher(
+                        // Health checks
+                        "/actuator/**",
+                        "/health",
 
-                        //Privados
+                        // Endpoints públicos
+                        "/usuarios/novo",
+                        "/usuarios/listar-usernames",
+                        "/usuarios/{id}/perfil",
+                        "/usuarios/{id}/seller-info",
+
+                        // Endpoints internos
+                        "/usuarios/status",
+                        "/usuarios/{id}"
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
+                // Desabilita tudo que exige autenticação
+                .oauth2Login(AbstractHttpConfigurer::disable)
+                .oauth2Client(AbstractHttpConfigurer::disable)
+                .oauth2ResourceServer(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable);
+
+        return http.build();
+    }
+
+    // ============================================================
+    // FILTRO PRIVADO
+    // ============================================================
+    @Bean
+    @Order(2)
+    public SecurityFilterChain privateFilterChain(HttpSecurity http) {
+        http
+                .securityMatcher("/**")
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/usuarios/listar-pfps",
                                 "/usuarios/trocar-pfp",
@@ -41,7 +67,10 @@ public class SecurityConfig {
                         //Fallback
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(Customizer.withDefaults())
+                )
+                .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
