@@ -64,7 +64,7 @@ public class UserKafkaProducer {
         }
     }
 
-    //** Métodos para testar o listener do Kafka **//
+    //** Métodos para testar o listener do Kafka - não usados em dev **//
     public CompletableFuture<SendResult<String, String>> sendAuctionReportApproved(AuctionReportApprovedEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);

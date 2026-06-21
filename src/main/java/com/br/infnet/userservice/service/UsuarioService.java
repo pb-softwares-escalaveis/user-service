@@ -58,6 +58,8 @@ public class UsuarioService {
 
     @Cacheable(value = "perfil", key = "#id")
     public UsuarioProfileResponse getUsuarioProfileById(UUID id) {
+        UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
+        log.info("[{}] Consultando perfil de usuário para ID: {}", correlationId, id);
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
         if (usuario.getStatus() == Status.INATIVO) {
@@ -68,11 +70,14 @@ public class UsuarioService {
 
     @Cacheable(value = "user-info", key = "#id")
     public UsuarioResponse getUsuarioInfoById(UUID id) {
+        UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
+        log.info("[{}] Consultando dados de usuário para pagamento", correlationId);
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
         if (usuario.getStatus() == Status.INATIVO) {
             throw new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id);
         }
+        log.info("[{}] Dados para pagamento encontrados para usuário de ID: {}", correlationId, id);
         return usuarioMapper.toResponse(usuario);
     }
 
@@ -80,6 +85,8 @@ public class UsuarioService {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
         }
+        UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
+        log.info("[{}] Consultando status de usuários de IDs: {}", correlationId, ids);
 
         List<UUID> uniqueIds = ids.stream().distinct().toList();
         List<Usuario> usuarios = usuarioRepository.findAllById(uniqueIds);
@@ -97,11 +104,13 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     @Cacheable(value = "vendedor-info", key = "#id")
     public VendedorResponseInfo getVendedorInfoById(UUID id) {
+        UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
         if (usuario.getStatus() == Status.INATIVO) {
             throw new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id);
         }
+        log.info("[{}] Consultando informações de vendedor para usuário ID: {}", correlationId, id);
         return usuarioMapper.toVendedorResponseInfo(usuario);
     }
 
@@ -178,17 +187,21 @@ public class UsuarioService {
     @Transactional
     @CacheEvict(value = "perfil", allEntries = true)
     public void alterarFotoDePerfil(String urlNovaFoto) {
+        UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
+        log.info("[{}] Iniciando alteração de foto de perfil", correlationId);
         JwtAuthenticationToken auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
             throw new UsuarioNaoAutenticadoException("Usuário não autenticado!");
         }
         String keycloakId = auth.getToken().getClaimAsString("sub");
 
+
         Usuario usuario = usuarioRepository.findById(UUID.fromString(keycloakId))
                 .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado no banco de dados!"));
 
         usuario.setFotoPerfil(urlNovaFoto);
         usuario.setDataAtualizacao(Instant.now());
+        log.info("Alterada foto de perfil para usuário de ID: {}", keycloakId);
 
         usuarioRepository.save(usuario);
     }

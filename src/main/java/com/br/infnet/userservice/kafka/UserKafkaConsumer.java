@@ -12,7 +12,6 @@ import com.br.infnet.userservice.utils.CorrelationIdUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.logging.MDC;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -24,19 +23,14 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Slf4j
 public class UserKafkaConsumer {
+
     private final UsuarioRepository usuarioRepository;
     private final UserKafkaProducer kafkaProducer;
     private final PenaltyFactory penalidadeFactory;
 
-    private void aplicarPenalidadePorMarks(UUID userId, String reason, Instant ocorridoEm, UUID correlationId) {
+    private void aplicarPenalidadePorMarks(UUID userId, String reason, Instant ocorridoEm) {
         try {
-            if (correlationId == null) {
-                log.warn("Correlation ID não encontrada no contexto de penalidade, gerando nova ID para rastreamento");
-                MDC.put("correlationId", CorrelationIdUtil.generateCorrelationId());
-            } else {
-                MDC.put("correlationId", correlationId);
-            }
-
+            log.info("Aplicando penalidade para usuário: {}", userId);
 
             Usuario usuario = usuarioRepository.findById(userId)
                     .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado: " + userId));
@@ -65,18 +59,20 @@ public class UserKafkaConsumer {
 
             log.info(strategy.getLogMessage(usuario));
 
-            emitirEvento(usuario, strategy, reason, ocorridoEm, correlationId);
-        } finally {
-            MDC.remove("correlationId");
+            emitirEvento(usuario, strategy, reason, ocorridoEm);
+
+        } catch (Exception e) {
+            log.error("Erro ao aplicar penalidade para usuário {}: {}", userId, e.getMessage(), e);
+            throw e;
         }
     }
 
-    private void emitirEvento(Usuario usuario, PenaltyStrategy strategy, String reason, Instant ocorridoEm, UUID correlationId) {
+    private void emitirEvento(Usuario usuario, PenaltyStrategy strategy, String reason, Instant ocorridoEm) {
         try {
-            UUID finalCorrelationId = correlationId != null ? correlationId : CorrelationIdUtil.getCorrelationIdAsUUID();
+            UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
             if (strategy.deveEmitirEventoDeSuspensao()) {
                 UserSuspendedEvent event = new UserSuspendedEvent(
-                        finalCorrelationId,
+                        correlationId,
                         usuario.getId(),
                         usuario.getNome(),
                         usuario.getEmail(),
@@ -85,10 +81,10 @@ public class UserKafkaConsumer {
                         usuario.getReputacao().getSuspensoAte()
                 );
                 kafkaProducer.sendUserSuspended(event).get(10, TimeUnit.SECONDS);
-                log.info("Evento de suspensão emitido para usuário {}, com correlationId {}", usuario.getId(), correlationId);
+                log.info("Evento de suspensão emitido para usuário {}", usuario.getId());
             } else {
                 UserBannedEvent event = new UserBannedEvent(
-                        finalCorrelationId,
+                        correlationId,
                         usuario.getId(),
                         usuario.getNome(),
                         usuario.getEmail(),
@@ -96,11 +92,11 @@ public class UserKafkaConsumer {
                         ocorridoEm
                 );
                 kafkaProducer.sendUserBanned(event).get(10, TimeUnit.SECONDS);
-                log.info("Evento de banimento emitido para usuário {}, com correlationId {}", usuario.getId(), correlationId);
+                log.info("Evento de banimento emitido para usuário {}", usuario.getId());
             }
         } catch (Exception e) {
-            log.error("Falha ao enviar evento de penalidade para o Kafka para usuário {}, reason: {}, correlationId: {}",
-                    usuario.getId(), reason, correlationId, e);
+            log.error("Falha ao enviar evento de penalidade para o Kafka para usuário {}, motivo: {}",
+                    usuario.getId(), reason, e);
             throw new RuntimeException("Falha ao enviar evento para o Kafka", e);
         }
     }
@@ -112,46 +108,68 @@ public class UserKafkaConsumer {
     @Transactional
     @KafkaListener(topics = "reviews.report.auction-approved")
     public void consumeAuctionReportApproved(AuctionReportApprovedEvent event) {
-        UUID correlationId = event.correlationId() != null ? event.correlationId() : CorrelationIdUtil.getCorrelationIdAsUUID();
-        MDC.put("correlationId", correlationId.toString());
+        UUID correlationId = event.correlationId() != null ?
+                event.correlationId() : CorrelationIdUtil.getCorrelationIdAsUUID();
+        CorrelationIdUtil.setCorrelationId(correlationId.toString());
+
         try {
-            log.info("Recebido report aprovado para leilão: auctionId={}, correlationId={}",
-                    event.auctionId(), correlationId);
-            aplicarPenalidadePorMarks(event.sellerId(), event.reason(), event.occurredAt(), correlationId);
+            log.info("Recebido report aprovado para leilão: auctionId={}, sellerId={}",
+                    event.auctionId(), event.sellerId());
+
+            aplicarPenalidadePorMarks(event.sellerId(), event.reason(), event.occurredAt());
+
+        } catch (Exception e) {
+            log.error("Erro ao processar evento de report aprovado: auctionId={}", event.auctionId(), e);
         } finally {
-            MDC.remove("correlationId");
+            CorrelationIdUtil.clear();
         }
     }
 
     @Transactional
     @KafkaListener(topics = "reviews.report.qa-approved")
     public void consumeMessageReportApproved(MessageReportApprovedEvent event) {
-        UUID correlationId = event.correlationId() != null ? event.correlationId() : CorrelationIdUtil.getCorrelationIdAsUUID();
-        MDC.put("correlationId", correlationId.toString());
+        UUID correlationId = event.correlationId() != null ?
+                event.correlationId() : CorrelationIdUtil.getCorrelationIdAsUUID();
+        CorrelationIdUtil.setCorrelationId(correlationId.toString());
+
         try {
-            log.info("Recebido report aprovado para mensagem: messageId={}, correlationId={}",
-                    event.messageId(), correlationId);
-            aplicarPenalidadePorMarks(event.sellerId(), event.reason(), event.occurredAt(), correlationId);
+            log.info("Recebido report aprovado para mensagem: messageId={}, sellerId={}",
+                    event.messageId(), event.sellerId());
+
+            aplicarPenalidadePorMarks(event.sellerId(), event.reason(), event.occurredAt());
+
+        } catch (Exception e) {
+            log.error("Erro ao processar evento de report de mensagem: messageId={}", event.messageId(), e);
         } finally {
-            MDC.remove("correlationId");
+            CorrelationIdUtil.clear();
         }
     }
 
     @Transactional
     @KafkaListener(topics = "transactions.status.closed")
     public void consumePaymentFailedClosed(PaymentFailedEvent event) {
-        UUID correlationId = event.correlationId() != null ? event.correlationId() : CorrelationIdUtil.getCorrelationIdAsUUID();
-        MDC.put("correlationId", correlationId.toString());
+        UUID correlationId = event.correlationId() != null ?
+                event.correlationId() : CorrelationIdUtil.getCorrelationIdAsUUID();
+        CorrelationIdUtil.setCorrelationId(correlationId.toString());
+
         try {
-            log.info("Transação {} com falha de pagamento, correlationId={}",
-                    event.transactionId(), correlationId);
+            log.info("Transação {} com falha de pagamento",
+                    event.transactionId());
+
             if (event.penalty()) {
                 log.info("Penalidade será aplicada para usuário: {}", event.highestBidderId());
-                aplicarPenalidadePorMarks(event.highestBidderId(), "Transação expirada por falta de pagamento",
-                        event.occurredAt(), correlationId);
+                aplicarPenalidadePorMarks(
+                        event.highestBidderId(),
+                        "Transação expirada por falta de pagamento",
+                        event.occurredAt()
+                );
+            } else {
+                log.info("Nenhuma penalidade aplicada para transação: {}", event.transactionId());
             }
+        } catch (Exception e) {
+            log.error("Erro ao processar evento de falha de pagamento: transactionId={}", event.transactionId(), e);
         } finally {
-            MDC.remove("correlationId");
+            CorrelationIdUtil.clear();
         }
     }
 }

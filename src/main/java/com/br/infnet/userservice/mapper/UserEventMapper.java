@@ -25,6 +25,7 @@ public class UserEventMapper {
         Endereco enderecoPrincipal = (enderecos != null && !enderecos.isEmpty()) ? enderecos.getFirst() : null;
         Reputacao reputacao = usuario.getReputacao();
         UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
+        log.info("Evento de criação de usuário mapeado para usuário {}", usuario.getId());
 
         return new UserCreatedEvent(
                 correlationId,

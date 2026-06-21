@@ -50,4 +50,14 @@ public class CorrelationIdUtil {
         }
         return null;
     }
+
+    public static void clear() {
+        MDC.remove(CORRELATION_ID_MDC);
+    }
+
+    public static void setCorrelationId(String correlationId) {
+        if (correlationId != null && !correlationId.isEmpty()) {
+            MDC.put(CORRELATION_ID_MDC, correlationId);
+        }
+    }
 }

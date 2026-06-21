@@ -1,62 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- ============================================================
-         PROPRIEDADES
-    ============================================================ -->
+
     <springProperty
             scope="context"
             name="APP_NAME"
             source="spring.application.name"
-            defaultValue="user-service"/>
+            defaultValue="unknown-service"
+    />
 
-    <!-- ============================================================
-         PATTERNS
-    ============================================================ -->
-    <property name="CONSOLE_LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) [%X{correlationId}] [${APP_NAME}] %logger{36} - %msg%n"/>
-
-    <property name="LOGSTASH_LOG_PATTERN"
-              value='{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","service":"${APP_NAME}","correlationId":"%X{correlationId}","thread":"%thread","logger":"%logger{36}","message":"%msg"}%n'/>
-
-    <!-- ============================================================
-         APPENDERS
-    ============================================================ -->
-
-    <!-- CONSOLE -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
-            <charset>utf8</charset>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] [${APP_NAME},%X{traceId:-},%X{spanId:-},%X{correlationId:-}]
+                %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+        <!--        <encoder>-->
+        <!--            <pattern>-->
+        <!--                %d{yyyy-MM-dd HH:mm:ss.SSS} %5p [${APP_NAME},%X{traceId:-},%X{spanId:-}] [%thread] %logger{36} - %msg%n-->
+        <!--            </pattern>-->
+        <!--        </encoder>-->
+    </appender>
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:5000</destination>
+
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service":"${APP_NAME}"}</customFields>
         </encoder>
     </appender>
 
+    <springProfile name="dev">
+        <logger name="org.apache.kafka" level="ERROR"/>
+        <logger name="org.springframework.kafka" level="ERROR"/>
+        <logger name="org.apache.kafka.clients.producer.ProducerConfig" level="ERROR"/>
+        <logger name="org.apache.kafka.common.utils.AppInfoParser" level="ERROR"/>
 
-    <!-- LOGSTASH -->
-<!--    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
-<!--        <destination>${LOGSTASH_HOST:-localhost}:${LOGSTASH_PORT:-5000}</destination>-->
-<!--        <keepAliveDuration>5 minutes</keepAliveDuration>-->
-<!--        <reconnectionDelay>10 seconds</reconnectionDelay>-->
-<!--        <encoder class="net.logstash.logback.encoder.LogstashEncoder">-->
-<!--            <customFields>{"service":"${APP_NAME}","environment":"${ENVIRONMENT:-local}"}</customFields>-->
-<!--        </encoder>-->
-<!--    </appender>-->
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+    </springProfile>
 
-    <!-- ============================================================
-         LOGGERS
-    ============================================================ -->
+    <springProfile name="prod">
+        <logger name="org.apache.kafka" level="ERROR"/>
+        <logger name="org.springframework.kafka" level="ERROR"/>
 
-    <!-- Root Logger -->
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="LOGSTASH"/>
-    </root>
-
-    <!-- Logs da aplicação em DEBUG -->
-    <logger name="com.br.infnet.userservice" level="DEBUG"/>
-    <logger name="com.br.infnet.userservice.kafka" level="DEBUG"/>
-
-    <!--Suprimir logs de bibliotecas -->
-    <logger name="org.springframework" level="WARN"/>
-    <logger name="org.apache.kafka" level="WARN"/>
-    <logger name="org.keycloak" level="WARN"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+    </springProfile>
 </configuration>

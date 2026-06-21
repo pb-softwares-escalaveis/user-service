@@ -4,6 +4,7 @@ import com.br.infnet.userservice.dto.*;
 import com.br.infnet.userservice.service.UsuarioService;
 import com.br.infnet.userservice.storage.BucketStorageService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Profile({"test", "dev"})
 @RestController
 @RequestMapping("/usuarios")
@@ -24,7 +26,6 @@ public class UsuarioController {
         this.storageService = storageService;
     }
 
-    //**CRUD USUÁRIO**//
     @PostMapping("/novo")
     public ResponseEntity<UsuarioCreationResponse> criarUsuario(@Valid @RequestBody UsuarioCreationRequest request) {
         UsuarioCreationResponse response = usuarioService.criarUsuario(request);
@@ -37,6 +38,18 @@ public class UsuarioController {
         UsuarioProfileResponse response = usuarioService.getUsuarioProfileById(id);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioProfileResponse> getCurrentUserProfile(
+            @RequestHeader(value = "X-User-Id") UUID userId) {
+
+        if (userId == null) {
+            return ResponseEntity.status(401).build();
+        }
+        UsuarioProfileResponse response = usuarioService.getUsuarioProfileById(userId);
+        return ResponseEntity.ok(response);
+    }
+
 
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<MessageResponse> deletarUsuario(@PathVariable UUID id) {
