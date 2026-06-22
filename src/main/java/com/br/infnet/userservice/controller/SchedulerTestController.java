@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequestMapping("/test/scheduler")
 @RequiredArgsConstructor
 @Slf4j
-@Profile("test")
+@Profile("dev")
 public class SchedulerTestController {
 
     private final UsuarioRepository usuarioRepository;

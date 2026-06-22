@@ -26,6 +26,7 @@ public class SecurityConfig {
                         // Health checks
                         "/actuator/**",
                         "/health",
+                        "/test/**",
 
                         // Endpoints públicos
                         "/usuarios/novo",
@@ -40,7 +41,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()
                 )
-
                 .oauth2ResourceServer(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable);
 

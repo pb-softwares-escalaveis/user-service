@@ -68,7 +68,7 @@ public class UserKafkaProducer {
     public CompletableFuture<SendResult<String, String>> sendAuctionReportApproved(AuctionReportApprovedEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);
-            return kafkaTemplate.send("reports.auction.approved", event.sellerId().toString(), json);
+            return kafkaTemplate.send("reviews.report.auction-approved", event.sellerId().toString(), json);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao serializar evento de report de leilão", e);
         }
@@ -77,7 +77,7 @@ public class UserKafkaProducer {
     public CompletableFuture<SendResult<String, String>> sendMessageReportApproved(MessageReportApprovedEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);
-            return kafkaTemplate.send("reports.message.approved", event.sellerId().toString(), json);
+            return kafkaTemplate.send("reviews.report.qa-approved", event.sellerId().toString(), json);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao serializar evento de report de mensagem", e);
         }
@@ -86,7 +86,7 @@ public class UserKafkaProducer {
     public CompletableFuture<SendResult<String, String>> sendPaymentFailed(PaymentFailedEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);
-            return kafkaTemplate.send("transactions.status.closed-payment-failed", event.highestBidderId().toString(), json);
+            return kafkaTemplate.send("transactions.status.closed", event.highestBidderId().toString(), json);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao serializar evento de falha de pagamento", e);
         }
