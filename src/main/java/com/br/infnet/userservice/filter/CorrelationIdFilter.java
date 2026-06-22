@@ -28,6 +28,12 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         try {
+            String path = request.getRequestURI();
+            if (path.startsWith("/actuator/")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             String correlationId = request.getHeader(CORRELATION_ID_HEADER);
 
             if (correlationId == null || correlationId.isEmpty()) {

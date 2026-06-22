@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserMetrics {
-
     private final Counter usersCreated;
     private final Counter usersDeleted;
     private final Counter usersBanned;
