@@ -57,6 +57,7 @@ public class SecurityConfig {
                 .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/usuarios/me",
                                 "/usuarios/listar-pfps",
                                 "/usuarios/trocar-pfp",
                                 "/usuarios/deletar/{id}"
@@ -65,10 +66,8 @@ public class SecurityConfig {
                         //Fallback
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(Customizer.withDefaults())
-                );
-
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
 }

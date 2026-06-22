@@ -28,6 +28,7 @@ public class UsuarioMapper {
         }
 
         return new UsuarioProfileResponse(
+                usuario.getId(),
                 usuario.getUsername(),
                 usuario.getFotoPerfil(),
                 valorReputacao

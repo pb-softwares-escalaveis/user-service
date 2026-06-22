@@ -39,15 +39,17 @@ public class UsuarioController {
         return ResponseEntity.ok(response);
     }
 
+    //A IA do front exigiu esse endpoint
     @GetMapping("/me")
     public ResponseEntity<UsuarioProfileResponse> getCurrentUserProfile(
             @RequestHeader(value = "X-User-Id") UUID userId) {
-
         if (userId == null) {
             return ResponseEntity.status(401).build();
         }
         UsuarioProfileResponse response = usuarioService.getUsuarioProfileById(userId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok()
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .body(response);
     }
 
 
@@ -65,12 +67,12 @@ public class UsuarioController {
     }
 
     @PutMapping("/trocar-pfp")
-    public ResponseEntity<Void> alterarFotoDePerfil(@RequestBody String linkFoto) {
-        if (linkFoto == null || linkFoto.trim().isEmpty()) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<Void> alterarFotoDePerfil(@RequestBody String linkFoto, @RequestHeader(value = "X-User-Id") UUID userId) {
+        if (userId == null) {
+            return ResponseEntity.status(401).build();
         }
 
-        usuarioService.alterarFotoDePerfil(linkFoto);
+        usuarioService.alterarFotoDePerfil(linkFoto, userId);
         return ResponseEntity.ok().build();
     }
 
