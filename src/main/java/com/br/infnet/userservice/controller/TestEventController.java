@@ -17,7 +17,7 @@ import java.util.UUID;
 @RequestMapping("/test/events")
 @RequiredArgsConstructor
 @Slf4j
-@Profile("dev")
+@Profile("test")
 public class TestEventController {
     private final UserKafkaProducer kafkaProducer;
 

@@ -15,60 +15,56 @@ import org.springframework.security.web.SecurityFilterChain;
 @Profile("!test")
 public class SecurityConfig {
 
-    // ============================================================
-    // FILTRO PÚBLICO
-    // ============================================================
-    @Bean
-    @Order(1)
-    public SecurityFilterChain publicFilterChain(HttpSecurity http) {
-        http
-                .securityMatcher(
-                        // Health checks
-                        "/actuator/**",
-                        "/health",
-                        "/test/**",
+        // ============================================================
+        // FILTRO PÚBLICO
+        // ============================================================
+        @Bean
+        @Order(1)
+        public SecurityFilterChain publicFilterChain(HttpSecurity http) {
+                http
+                                .securityMatcher(
+                                                // Health checks
+                                                "/actuator/**",
+                                                "/health",
 
-                        // Endpoints públicos
-                        "/usuarios/novo",
-                        "/usuarios/listar-usernames",
-                        "/usuarios/{id}/perfil",
-                        "/usuarios/{id}/seller-info",
+                                                // Endpoints públicos
+                                                "/usuarios/novo",
+                                                "/usuarios/listar-usernames",
+                                                "/usuarios/{id}/perfil",
+                                                "/usuarios/{id}/seller-info",
 
-                        // Endpoints internos
-                        "/usuarios/status",
-                        "/usuarios/{id}"
-                )
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-                )
-                .oauth2ResourceServer(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable);
+                                                // Endpoints internos
+                                                "/usuarios/status",
+                                                "/usuarios/{id}")
+                                .authorizeHttpRequests(auth -> auth
+                                                .anyRequest().permitAll())
 
-        return http.build();
-    }
+                                .oauth2ResourceServer(AbstractHttpConfigurer::disable)
+                                .csrf(AbstractHttpConfigurer::disable);
 
-    // ============================================================
-    // FILTRO PRIVADO
-    // ============================================================
-    @Bean
-    @Order(2)
-    public SecurityFilterChain privateFilterChain(HttpSecurity http) {
-        http
-                .securityMatcher("/**")
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/usuarios/listar-pfps",
-                                "/usuarios/trocar-pfp",
-                                "/usuarios/deletar/{id}"
-                        ).authenticated()
+                return http.build();
+        }
 
-                        //Fallback
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(Customizer.withDefaults())
-                );
+        // ============================================================
+        // FILTRO PRIVADO
+        // ============================================================
+        @Bean
+        @Order(2)
+        public SecurityFilterChain privateFilterChain(HttpSecurity http) {
+                http
+                                .securityMatcher("/**")
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(
+                                                                "/usuarios/listar-pfps",
+                                                                "/usuarios/trocar-pfp",
+                                                                "/usuarios/deletar/{id}")
+                                                .authenticated()
 
-        return http.build();
-    }
+                                                // Fallback
+                                                .anyRequest().authenticated())
+                                .oauth2ResourceServer(oauth2 -> oauth2
+                                                .jwt(Customizer.withDefaults()));
+
+                return http.build();
+        }
 }

@@ -47,7 +47,9 @@ public class UsuarioController {
             return ResponseEntity.status(401).build();
         }
         UsuarioProfileResponse response = usuarioService.getUsuarioProfileById(userId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok()
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .body(response);
     }
 
 

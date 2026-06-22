@@ -10,7 +10,6 @@ import com.br.infnet.userservice.exceptions.UsuarioNotFoundException;
 import com.br.infnet.userservice.exceptions.UsuarioMenorDeIdadeException;
 import com.br.infnet.userservice.kafka.UserKafkaProducer;
 import com.br.infnet.userservice.mapper.UsuarioMapper;
-import com.br.infnet.userservice.metrics.UserMetrics;
 import com.br.infnet.userservice.repository.UsuarioRepository;
 import com.br.infnet.userservice.utils.CorrelationIdUtil;
 import jakarta.ws.rs.core.Response;
@@ -44,19 +43,17 @@ public class UsuarioService {
     private final Keycloak keycloak;
     private final UserKafkaProducer kafkaProducer;
     private final UserEventMapper userEventMapper;
-    private final UserMetrics userMetrics;
 
     @Value("${keycloak.realm}")
     private String realm;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
-                          UsuarioMapper usuarioMapper, Keycloak keycloak, UserKafkaProducer kafkaProducer, UserEventMapper userEventMapper, UserMetrics userMetrics) {
+                          UsuarioMapper usuarioMapper, Keycloak keycloak, UserKafkaProducer kafkaProducer, UserEventMapper userEventMapper) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
         this.keycloak = keycloak;
         this.kafkaProducer = kafkaProducer;
         this.userEventMapper = userEventMapper;
-        this.userMetrics = userMetrics;
     }
 
     @Cacheable(value = "perfil", key = "#id")
@@ -149,7 +146,6 @@ public class UsuarioService {
         log.info("[{}] Usuário salvo no banco: {}", correlationId, novoUsuario.getId());
 
         UserCreatedEvent eventoCriacao = userEventMapper.toUserCreatedEvent(novoUsuario);
-        userMetrics.incrementUsersCreated();
 
        try {
             kafkaProducer.sendUserCreated(eventoCriacao).get(20, java.util.concurrent.TimeUnit.SECONDS);
@@ -172,7 +168,6 @@ public class UsuarioService {
         usuario.setStatus(Status.INATIVO);
         usuario.setDataAtualizacao(Instant.now());
         usuarioRepository.save(usuario);
-        userMetrics.incrementUsersDeleted();
 
         UserDeletedEvent eventoDelecao = new UserDeletedEvent(
                 UUID.randomUUID(),
