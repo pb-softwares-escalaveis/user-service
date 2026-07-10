@@ -71,10 +71,3 @@ s3:
   bucket-name: ${S3_BUCKET_NAME:test-bucket}
   access-key: ${S3_ACCESS_KEY:test}
   secret-key: ${S3_SECRET_KEY:test}
-
-logging:
-  level:
-    com.br.infnet.userservice: DEBUG
-    org.springframework.kafka: INFO
-    org.springframework.web: DEBUG
-    org.springframework.security: WARN

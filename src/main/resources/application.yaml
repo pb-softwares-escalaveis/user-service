@@ -44,8 +44,8 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_SERVER_URL}
-    register-with-eureka: true
-    fetch-registry: true
+    register-with-eureka: ${EUREKA_CLIENT_REGISTER_WITH_EUREKA}
+    fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY}
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
     hostname: ${spring.application.name}

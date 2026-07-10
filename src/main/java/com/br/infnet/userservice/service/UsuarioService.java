@@ -83,8 +83,7 @@ public class UsuarioService {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
         }
-        UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
-        log.info("[{}] Consultando status de usuários de IDs: {}", correlationId, ids);
+        log.info("Consultando status de usuários de IDs: {}", ids);
 
         List<UUID> uniqueIds = ids.stream().distinct().toList();
         List<Usuario> usuarios = usuarioRepository.findAllById(uniqueIds);
@@ -102,7 +101,6 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     @Cacheable(value = "vendedor-info", key = "#id")
     public VendedorResponseInfo getVendedorInfoById(UUID id) {
-        UUID correlationId = CorrelationIdUtil.getCorrelationIdAsUUID();
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado com o ID: " + id));
         if (usuario.getStatus() == Status.INATIVO) {
@@ -126,7 +124,7 @@ public class UsuarioService {
             throw new IllegalArgumentException("Email já cadastrado: " + request.email());
         }
 
-        if(usuarioRepository.existsByCpf(request.cpf())) {
+        if (usuarioRepository.existsByCpf(request.cpf())) {
             throw new IllegalArgumentException("CPF já cadastrado: " + request.cpf());
         }
 
@@ -134,21 +132,42 @@ public class UsuarioService {
             throw new UsuarioMenorDeIdadeException("Cadastro não permitido: Você deve ter 18 anos ou mais.");
         }
 
-        UUID keycloakId = criarUsuarioViaKeycloakAPI(request);
-        log.info("Usuário criado no Keycloak: {}", keycloakId);
+        UUID keycloakId = null;
+        Usuario novoUsuario;
+        UserCreatedEvent eventoCriacao;
 
-        Usuario novoUsuario = usuarioMapper.toEntity(request);
-        novoUsuario.setId(keycloakId);
-        usuarioRepository.save(novoUsuario);
-        log.info("Usuário salvo no banco: {}", novoUsuario.getId());
+        try {
+            keycloakId = criarUsuarioViaKeycloakAPI(request);
+            log.info("Usuário criado no Keycloak: {}", keycloakId);
 
-        UserCreatedEvent eventoCriacao = userEventMapper.toUserCreatedEvent(novoUsuario);
-        userMetrics.incrementUsersCreated();
+            novoUsuario = usuarioMapper.toEntity(request);
+            novoUsuario.setId(keycloakId);
+            usuarioRepository.save(novoUsuario);
+            log.info("Usuário salvo no banco: {}", novoUsuario.getId());
 
-       try {
-            kafkaProducer.sendUserCreated(eventoCriacao).get(20, java.util.concurrent.TimeUnit.SECONDS);
+            eventoCriacao = userEventMapper.toUserCreatedEvent(novoUsuario);
+            userMetrics.incrementUsersCreated();
+
         } catch (Exception e) {
-            throw new RuntimeException("Falha ao enviar evento de criação para o Kafka", e);
+            if (keycloakId != null) {
+                try (Response _ = keycloak.realm(realm).users().delete(keycloakId.toString())) {
+                    log.warn("Usuário removido do Keycloak após falha: {}", keycloakId);
+                } catch (Exception ex) {
+                    log.error("NÃO FOI POSSÍVEL REMOVER USUÁRIO DO KEYCLOAK: {}", keycloakId, ex);
+                }
+            }
+            log.error("Falha ao criar usuário: {}", request.email(), e);
+            throw new RuntimeException("Falha ao criar usuário: " + e.getMessage(), e);
+        }
+
+        try {
+            if (eventoCriacao != null) {
+                kafkaProducer.sendUserCreated(eventoCriacao).get(20, java.util.concurrent.TimeUnit.SECONDS);
+                log.info("Evento de criação enviado com sucesso para o Kafka: {}", eventoCriacao.userId());
+            }
+        } catch (Exception e) {
+            log.error("FALHA CRÍTICA: Usuário criado mas evento Kafka não enviado. userId: {}, correlationId: {}",
+                    novoUsuario.getId(), CorrelationIdUtil.getCorrelationId(), e);
         }
         return new UsuarioCreationResponse(novoUsuario.getId());
     }
