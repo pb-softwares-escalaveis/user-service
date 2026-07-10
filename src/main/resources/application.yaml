@@ -38,18 +38,17 @@ spring:
           jwk-set-uri: ${KEYCLOAK_INTERNAL_URL}/realms/leilao-service/protocol/openid-connect/certs
 
   kafka:
-    bootstrap-servers: ${KAFKA_SERVERS}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: ${EUREKA_SERVER_URL}
     register-with-eureka: true
     fetch-registry: true
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
     hostname: ${spring.application.name}
-    prefer-ip-address: false
 
 management:
   endpoints:
