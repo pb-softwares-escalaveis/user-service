@@ -3,10 +3,13 @@ package com.br.infnet.userservice.controller;
 import com.br.infnet.userservice.dto.*;
 import com.br.infnet.userservice.service.UsuarioService;
 import com.br.infnet.userservice.storage.BucketStorageService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -27,10 +30,40 @@ public class UsuarioController {
     }
 
     @PostMapping("/novo")
-    public ResponseEntity<UsuarioCreationResponse> criarUsuario(@Valid @RequestBody UsuarioCreationRequest request) {
-        UsuarioCreationResponse response = usuarioService.criarUsuario(request);
-        URI location = URI.create("/usuarios/" + response.userId() + "/perfil");
-        return ResponseEntity.created(location).body(response);
+    public ResponseEntity<UsuarioCreationResponse> criarUsuario(
+            @Valid @RequestBody UsuarioCreationRequest request,
+            HttpServletRequest httpRequest) {
+
+        try {
+            UsuarioCreationResponse response = usuarioService.criarUsuario(request);
+            // Invalida a sessão após sucesso (força login explícito)
+            invalidarSessao(httpRequest);
+            // Retorna 201 Created com a localização
+            URI location = URI.create("/usuarios/" + response.userId() + "/perfil");
+            return ResponseEntity.created(location).body(response);
+
+        } catch (Exception e) {
+            // Em caso de falha, também invalida a sessão
+            invalidarSessao(httpRequest);
+            // Log do erro (opcional)
+            log.error("Falha na criação de usuário: {}", request.email(), e);
+            // Retorna 400 Bad Request com a mensagem da exceção
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    //Metodo auxiliar para invalidar a sessão de forma segura
+    private void invalidarSessao(HttpServletRequest request) {
+        try {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+                SecurityContextHolder.clearContext();
+                log.debug("Sessão invalidada com sucesso");
+            }
+        } catch (Exception e) {
+            log.warn("Erro ao invalidar sessão: {}", e.getMessage());
+        }
     }
 
     @GetMapping("/{id}/perfil")
