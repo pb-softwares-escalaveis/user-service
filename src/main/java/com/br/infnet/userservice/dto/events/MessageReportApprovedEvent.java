@@ -10,7 +10,7 @@ public record MessageReportApprovedEvent(
         Long auctionId,
         UUID sellerId,
         Long messageId,
-        @JsonAlias({"reason", "reprovedReason"})
+        @JsonAlias({"reason", "removalReason"})
         String reason,
         Instant occurredAt
 ) {
