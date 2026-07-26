@@ -56,7 +56,6 @@ public class UsuarioService {
         this.userMetrics = userMetrics;
     }
 
-    @Cacheable(value = "perfil", key = "#id")
     public UsuarioProfileResponse getUsuarioProfileById(UUID id) {
         log.info("Consultando perfil de usuário para ID: {}", id);
         Usuario usuario = usuarioRepository.findById(id)

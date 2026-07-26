@@ -27,10 +27,17 @@ public class UsuarioMapper {
             valorReputacao = usuario.getReputacao().getNota();
         }
 
+        Instant suspensoAte = null;
+        if (usuario.getReputacao() != null) {
+            suspensoAte = usuario.getReputacao().getSuspensoAte();
+        }
+
         return new UsuarioProfileResponse(
                 usuario.getId(),
                 usuario.getUsername(),
                 usuario.getFotoPerfil(),
+                usuario.getStatus().toString(),
+                suspensoAte,
                 valorReputacao
         );
     }
